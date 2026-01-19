@@ -6,7 +6,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Redirect authenticated users to /today, guests see Welcome
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('today');
+    }
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -15,8 +19,9 @@ Route::get('/', function () {
     ]);
 });
 
+// Redirect /dashboard to /today
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route('today');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

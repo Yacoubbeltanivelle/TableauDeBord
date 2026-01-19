@@ -11,7 +11,7 @@ return new class extends Migration
         // Tags table
         Schema::create('tags', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name', 50);
             $table->string('color', 7)->default('#6366F1');
             $table->timestamps();

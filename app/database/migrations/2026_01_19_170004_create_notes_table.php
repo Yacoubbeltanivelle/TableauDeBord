@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('notes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('project_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title');
             $table->longText('content')->nullable();

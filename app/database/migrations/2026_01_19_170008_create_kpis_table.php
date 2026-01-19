@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('kpis', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->decimal('value', 15, 2);
             $table->string('unit', 20)->default('');

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('inbox_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('content');
             $table->boolean('processed')->default(false);
             $table->timestamp('processed_at')->nullable();
