@@ -1,0 +1,76 @@
+---
+# cPanel Git Deployment Configuration
+# Documentation: https://docs.cpanel.net/knowledge-base/web-services/guide-to-git-deployment/
+#
+# ⚠️ IMPORTANT:
+# - Pas de wildcards (*) pour éviter les déploiements accidentels
+# - Chaque fichier/dossier doit être listé explicitement
+# - Les commandes PHP utilisent le chemin complet
+---
+
+deployment:
+  tasks:
+    # ─────────────────────────────────────────────────────────────
+    # 1. Copier le code vers le dossier web
+    # ─────────────────────────────────────────────────────────────
+    
+    # Structure principale
+    - export DEPLOYPATH=/home/$USER/public_html/app
+    
+    # Créer les dossiers nécessaires
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH/storage/framework/cache
+    - /bin/mkdir -p $DEPLOYPATH/storage/framework/sessions
+    - /bin/mkdir -p $DEPLOYPATH/storage/framework/views
+    - /bin/mkdir -p $DEPLOYPATH/storage/logs
+    - /bin/mkdir -p $DEPLOYPATH/bootstrap/cache
+
+    # Copier les dossiers (explicitement, pas de wildcard)
+    - /bin/cp -R $REPOPATH/app $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/bootstrap $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/config $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/database $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/public $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/resources $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/routes $DEPLOYPATH/
+    - /bin/cp -R $REPOPATH/vendor $DEPLOYPATH/
+    
+    # Copier les fichiers racine (un par un)
+    - /bin/cp $REPOPATH/artisan $DEPLOYPATH/
+    - /bin/cp $REPOPATH/composer.json $DEPLOYPATH/
+    - /bin/cp $REPOPATH/composer.lock $DEPLOYPATH/
+    - /bin/cp $REPOPATH/package.json $DEPLOYPATH/
+    
+    # ─────────────────────────────────────────────────────────────
+    # 2. NE PAS copier ces fichiers sensibles
+    # ─────────────────────────────────────────────────────────────
+    # ❌ .env          → Créer manuellement sur serveur
+    # ❌ .git/         → Ne jamais exposer
+    # ❌ node_modules/ → Inutile en production
+    # ❌ tests/        → Inutile en production
+    
+    # ─────────────────────────────────────────────────────────────
+    # 3. Commandes Laravel post-déploiement
+    # ─────────────────────────────────────────────────────────────
+    
+    # Migrations (--force pour production)
+    - /usr/local/bin/php $DEPLOYPATH/artisan migrate --force
+    
+    # Cache de configuration
+    - /usr/local/bin/php $DEPLOYPATH/artisan config:cache
+    
+    # Cache des routes
+    - /usr/local/bin/php $DEPLOYPATH/artisan route:cache
+    
+    # Cache des vues
+    - /usr/local/bin/php $DEPLOYPATH/artisan view:cache
+    
+    # Lien symbolique storage
+    - /usr/local/bin/php $DEPLOYPATH/artisan storage:link
+    
+    # ─────────────────────────────────────────────────────────────
+    # 4. Permissions
+    # ─────────────────────────────────────────────────────────────
+    - /bin/chmod -R 755 $DEPLOYPATH
+    - /bin/chmod -R 775 $DEPLOYPATH/storage
+    - /bin/chmod -R 775 $DEPLOYPATH/bootstrap/cache

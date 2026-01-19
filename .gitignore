@@ -1,0 +1,11 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Antigravity temp (si présent)
+temp_docs/
+
+# Logs / caches divers
+*.log
