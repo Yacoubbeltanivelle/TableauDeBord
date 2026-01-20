@@ -206,19 +206,19 @@ class DashboardController extends Controller
         $user = auth()->user();
         
         $events = Event::where('user_id', $user->id)
-            ->where('starts_at', '>=', now()->startOfMonth())
-            ->where('starts_at', '<=', now()->endOfMonth()->addMonth())
-            ->orderBy('starts_at')
+            ->where('start_at', '>=', now()->startOfMonth())
+            ->where('start_at', '<=', now()->endOfMonth()->addMonth())
+            ->orderBy('start_at')
             ->get()
             ->map(fn($event) => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
-                'starts_at' => $event->starts_at->toIso8601String(),
-                'ends_at' => $event->ends_at?->toIso8601String(),
-                'all_day' => $event->is_all_day,
-                'location' => $event->location,
-                'date' => $event->starts_at->format('Y-m-d'),
+                'starts_at' => $event->start_at->toIso8601String(),
+                'ends_at' => $event->end_at?->toIso8601String(),
+                'all_day' => $event->all_day,
+                'location' => null,
+                'date' => $event->start_at->format('Y-m-d'),
             ]);
 
         return Inertia::render('Calendar', [
@@ -249,7 +249,7 @@ class DashboardController extends Controller
             ]);
 
         $kpis = Kpi::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('recorded_at', 'desc')
             ->get()
             ->map(fn($kpi) => [
                 'id' => $kpi->id,
