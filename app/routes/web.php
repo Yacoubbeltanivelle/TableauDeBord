@@ -6,16 +6,14 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Redirect authenticated users to /today, guests see Welcome
+// Redirect authenticated users to /today, guests see Landing
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('today');
     }
-    return Inertia::render('Welcome', [
+    return Inertia::render('Landing', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
 });
 
