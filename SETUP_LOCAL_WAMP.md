@@ -6,13 +6,13 @@
 
 ## 📋 Prérequis
 
-| Logiciel | Version | Vérifier |
-|----------|---------|----------|
-| WampServer | 3.3+ | `wampmanager.exe` |
-| PHP | 8.2+ | `php -v` |
-| Composer | 2.x | `composer -V` |
-| Node.js | 20+ | `node -v` |
-| Git | 2.x | `git --version` |
+| Logiciel   | Version | Vérifier          |
+| ---------- | ------- | ----------------- |
+| WampServer | 3.3+    | `wampmanager.exe` |
+| PHP        | 8.2+    | `php -v`          |
+| Composer   | 2.x     | `composer -V`     |
+| Node.js    | 20+     | `node -v`         |
+| Git        | 2.x     | `git --version`   |
 
 ---
 
@@ -49,6 +49,9 @@ npm install
 # 2. Lancer Vite dev server
 npm run dev
 # → http://localhost:5173 (HMR actif)
+
+# 3. Lancer tout
+composer run dev:win
 ```
 
 ### 🎉 Accéder à l'application
@@ -77,13 +80,13 @@ npm run dev
 <VirtualHost *:80>
     ServerName tableaudebord.local
     DocumentRoot "F:/Carriere/Business2026/TableauDeBord/app/public"
-    
+
     <Directory "F:/Carriere/Business2026/TableauDeBord/app/public">
         Options Indexes FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
-    
+
     ErrorLog "logs/tableaudebord-error.log"
     CustomLog "logs/tableaudebord-access.log" common
 </VirtualHost>
@@ -164,22 +167,22 @@ npm run build
 
 ## ✅ Checklist Validation
 
-| Test | Attendu |
-|------|---------|
-| http://localhost:8000 | Page d'accueil Laravel |
+| Test                           | Attendu                |
+| ------------------------------ | ---------------------- |
+| http://localhost:8000          | Page d'accueil Laravel |
 | http://localhost:8000/register | Formulaire inscription |
-| `php artisan migrate` | Migrations OK |
-| `npm run dev` | Vite HMR actif |
-| `npm run build` | Build sans erreur |
+| `php artisan migrate`          | Migrations OK          |
+| `npm run dev`                  | Vite HMR actif         |
+| `npm run build`                | Build sans erreur      |
 
 ---
 
 ## ⚠️ Dépannage
 
-| Problème | Solution |
-|----------|----------|
-| "Class not found" | `composer dump-autoload` |
-| "Permission denied storage" | `chmod 775 storage bootstrap/cache` |
-| "Vite manifest not found" | Lancer `npm run dev` |
-| "SQLSTATE Connection refused" | Vérifier MySQL actif dans Wamp |
-| Page blanche | Vérifier `php artisan serve` actif |
+| Problème                      | Solution                            |
+| ----------------------------- | ----------------------------------- |
+| "Class not found"             | `composer dump-autoload`            |
+| "Permission denied storage"   | `chmod 775 storage bootstrap/cache` |
+| "Vite manifest not found"     | Lancer `npm run dev`                |
+| "SQLSTATE Connection refused" | Vérifier MySQL actif dans Wamp      |
+| Page blanche                  | Vérifier `php artisan serve` actif  |
