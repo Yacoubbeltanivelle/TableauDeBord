@@ -17,11 +17,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create demo user
+        // Create demo user (already verified for immediate access)
         $user = User::factory()->create([
             'name' => 'Demo User',
             'email' => 'demo@tableaudebord.test',
             'password' => bcrypt('password'),
+            'email_verified_at' => now(),
         ]);
 
         // Create tags for this user
