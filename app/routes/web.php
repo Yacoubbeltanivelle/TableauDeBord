@@ -36,6 +36,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/notes', [DashboardController::class, 'notes'])->name('notes');
     Route::get('/calendar', [DashboardController::class, 'calendar'])->name('calendar');
     Route::get('/business', [DashboardController::class, 'business'])->name('business');
+
+    // API Routes for CRUD operations
+    Route::prefix('api')->group(function () {
+        // Tasks
+        Route::post('/tasks', [\App\Http\Controllers\Api\TaskController::class, 'store'])->name('api.tasks.store');
+        Route::patch('/tasks/{task}/toggle', [\App\Http\Controllers\Api\TaskController::class, 'toggle'])->name('api.tasks.toggle');
+        Route::patch('/tasks/{task}/today', [\App\Http\Controllers\Api\TaskController::class, 'moveToToday'])->name('api.tasks.today');
+        Route::patch('/tasks/{task}/status', [\App\Http\Controllers\Api\TaskController::class, 'updateStatus'])->name('api.tasks.status');
+        Route::delete('/tasks/{task}', [\App\Http\Controllers\Api\TaskController::class, 'destroy'])->name('api.tasks.destroy');
+
+        // Projects
+        Route::post('/projects', [\App\Http\Controllers\Api\ProjectController::class, 'store'])->name('api.projects.store');
+        Route::delete('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'destroy'])->name('api.projects.destroy');
+
+        // Notes
+        Route::post('/notes', [\App\Http\Controllers\Api\NoteController::class, 'store'])->name('api.notes.store');
+        Route::patch('/notes/{note}', [\App\Http\Controllers\Api\NoteController::class, 'update'])->name('api.notes.update');
+        Route::delete('/notes/{note}', [\App\Http\Controllers\Api\NoteController::class, 'destroy'])->name('api.notes.destroy');
+
+        // Events
+        Route::post('/events', [\App\Http\Controllers\Api\EventController::class, 'store'])->name('api.events.store');
+        Route::delete('/events/{event}', [\App\Http\Controllers\Api\EventController::class, 'destroy'])->name('api.events.destroy');
+    });
 });
 
 // Legal pages (public)
