@@ -1,13 +1,15 @@
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import AppShell from "@/Layouts/AppShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Card, CardContent } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
 import {
     GripVertical,
     FolderKanban,
     Calendar,
     AlertCircle,
+    X,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface Task {
     id: string;
@@ -35,10 +37,10 @@ interface TasksBoardProps {
 }
 
 const columnConfig = {
-    TODO: { title: "To Do", color: "bg-gray-500" },
-    IN_PROGRESS: { title: "In Progress", color: "bg-blue-500" },
-    BLOCKED: { title: "Blocked", color: "bg-red-500" },
-    DONE: { title: "Done", color: "bg-green-500" },
+    TODO: { title: "À faire", color: "bg-gray-500" },
+    IN_PROGRESS: { title: "En cours", color: "bg-blue-500" },
+    BLOCKED: { title: "Bloqué", color: "bg-red-500" },
+    DONE: { title: "Terminé", color: "bg-green-500" },
 };
 
 const priorityColors: Record<string, string> = {
@@ -49,13 +51,41 @@ const priorityColors: Record<string, string> = {
 };
 
 export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {
+    const [toast, setToast] = useState<{
+        message: string;
+        type: "success" | "error";
+    } | null>(null);
+    const { flash } = usePage().props as {
+        flash?: { success?: string; error?: string };
+    };
+
+    // Show flash messages as toast
+    useEffect(() => {
+        if (flash?.success) {
+            setToast({ message: flash.success, type: "success" });
+        } else if (flash?.error) {
+            setToast({ message: flash.error, type: "error" });
+        }
+    }, [flash]);
+
+    // Auto-hide toast after 3 seconds
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
+
     const moveTask = (taskId: string, newStatus: string) => {
         // Check WIP limit for IN_PROGRESS
         if (
             newStatus === "IN_PROGRESS" &&
             columns.IN_PROGRESS.length >= wipLimit
         ) {
-            alert(`WIP limit reached! Max ${wipLimit} tasks in progress.`);
+            setToast({
+                message: `Limite WIP atteinte ! Max ${wipLimit} tâches en cours.`,
+                type: "error",
+            });
             return;
         }
 
@@ -133,7 +163,7 @@ export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {
                                                 moveTask(task.id, "TODO")
                                             }
                                         >
-                                            ← Todo
+                                            ← À faire
                                         </Button>
                                     )}
                                     {status !== "IN_PROGRESS" && (
@@ -145,7 +175,7 @@ export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {
                                                 moveTask(task.id, "IN_PROGRESS")
                                             }
                                         >
-                                            → Doing
+                                            → En cours
                                         </Button>
                                     )}
                                     {status !== "DONE" && (
@@ -157,7 +187,7 @@ export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {
                                                 moveTask(task.id, "DONE")
                                             }
                                         >
-                                            ✓ Done
+                                            ✓ Terminé
                                         </Button>
                                     )}
                                 </div>
@@ -167,7 +197,7 @@ export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {
 
                     {tasks.length === 0 && (
                         <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-                            No tasks
+                            Aucune tâche
                         </div>
                     )}
                 </div>
@@ -176,8 +206,27 @@ export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {
     };
 
     return (
-        <AppShell title="Tasks Board">
-            <Head title="Tasks Board" />
+        <AppShell title="Tableau des tâches">
+            <Head title="Tableau des tâches" />
+
+            {/* Toast Notification */}
+            {toast && (
+                <div
+                    className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg transition-all ${
+                        toast.type === "success"
+                            ? "bg-green-50 text-green-800 border border-green-200"
+                            : "bg-red-50 text-red-800 border border-red-200"
+                    }`}
+                >
+                    <span className="text-sm font-medium">{toast.message}</span>
+                    <button
+                        onClick={() => setToast(null)}
+                        className="p-1 hover:bg-black/10 rounded-full transition-colors"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
 
             <div className="flex gap-4 overflow-x-auto pb-4">
                 {renderColumn("TODO")}
