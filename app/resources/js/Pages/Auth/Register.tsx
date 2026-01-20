@@ -1,121 +1,312 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import AuthLayout from "@/Layouts/AuthLayout";
+import PasswordStrength, { rules } from "@/Components/PasswordStrength";
+import { Head, Link, useForm } from "@inertiajs/react";
+import { FormEventHandler, useState, useMemo, useEffect } from "react";
+import { Eye, EyeOff, Loader2, Check } from "lucide-react";
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
+        name: "",
+        email: "",
+        password: "",
+        password_confirmation: "",
+        terms: false,
+        // Honeypot fields
+        website: "", // Hidden field - should remain empty
+        form_time: Date.now().toString(),
     });
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [formStartTime] = useState(Date.now());
+
+    // Password validation
+    const passwordValid = useMemo(() => {
+        return rules.every((rule) => rule.test(data.password));
+    }, [data.password]);
+
+    const passwordsMatch = useMemo(() => {
+        return (
+            data.password === data.password_confirmation &&
+            data.password_confirmation.length > 0
+        );
+    }, [data.password, data.password_confirmation]);
+
+    const formValid = useMemo(() => {
+        return (
+            data.name.length >= 2 &&
+            data.email.includes("@") &&
+            passwordValid &&
+            passwordsMatch &&
+            data.terms
+        );
+    }, [data.name, data.email, passwordValid, passwordsMatch, data.terms]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
+        // Update form time before submitting
+        setData("form_time", formStartTime.toString());
+
+        post(route("register"), {
+            onFinish: () => reset("password", "password_confirmation"),
         });
     };
 
     return (
-        <GuestLayout>
-            <Head title="Register" />
+        <AuthLayout
+            title="Créer un compte"
+            subtitle="Commencez votre aventure gratuitement"
+        >
+            <Head title="Créer un compte" />
 
-            <form onSubmit={submit}>
+            {/* Global error message */}
+            {Object.keys(errors).length > 0 && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl">
+                    <p className="text-[13px] text-red-600 font-medium">
+                        Veuillez corriger les erreurs ci-dessous.
+                    </p>
+                </div>
+            )}
+
+            <form onSubmit={submit} className="space-y-5">
+                {/* Honeypot - Hidden from users */}
+                <input
+                    type="text"
+                    name="website"
+                    value={data.website}
+                    onChange={(e) => setData("website", e.target.value)}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                />
+                <input type="hidden" name="form_time" value={data.form_time} />
+
+                {/* Name */}
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
-                    <TextInput
+                    <label
+                        htmlFor="name"
+                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                    >
+                        Nom complet
+                    </label>
+                    <input
                         id="name"
-                        name="name"
+                        type="text"
                         value={data.name}
-                        className="mt-1 block w-full"
+                        onChange={(e) => setData("name", e.target.value)}
+                        className={`
+                            w-full px-4 py-3 text-[15px] rounded-xl border bg-gray-50/50
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                            transition-all
+                            ${errors.name ? "border-red-300" : "border-gray-200"}
+                        `}
+                        placeholder="Jean Dupont"
                         autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
+                        autoFocus
                         required
                     />
-
-                    <InputError message={errors.name} className="mt-2" />
+                    {errors.name && (
+                        <p className="mt-1.5 text-[12px] text-red-600">
+                            {errors.name}
+                        </p>
+                    )}
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
+                {/* Email */}
+                <div>
+                    <label
+                        htmlFor="email"
+                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                    >
+                        Adresse email
+                    </label>
+                    <input
                         id="email"
                         type="email"
-                        name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) => setData("email", e.target.value)}
+                        className={`
+                            w-full px-4 py-3 text-[15px] rounded-xl border bg-gray-50/50
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                            transition-all
+                            ${errors.email ? "border-red-300" : "border-gray-200"}
+                        `}
+                        placeholder="jean@exemple.com"
+                        autoComplete="email"
                         required
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
+                    {errors.email && (
+                        <p className="mt-1.5 text-[12px] text-red-600">
+                            {errors.email}
+                        </p>
+                    )}
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                {/* Password */}
+                <div>
+                    <label
+                        htmlFor="password"
+                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
                     >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
+                        Mot de passe
+                    </label>
+                    <div className="relative">
+                        <input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            value={data.password}
+                            onChange={(e) =>
+                                setData("password", e.target.value)
+                            }
+                            className={`
+                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-gray-50/50
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                                transition-all
+                                ${errors.password ? "border-red-300" : "border-gray-200"}
+                            `}
+                            placeholder="••••••••••••"
+                            autoComplete="new-password"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            {showPassword ? (
+                                <EyeOff className="w-5 h-5" />
+                            ) : (
+                                <Eye className="w-5 h-5" />
+                            )}
+                        </button>
+                    </div>
+                    {errors.password && (
+                        <p className="mt-1.5 text-[12px] text-red-600">
+                            {errors.password}
+                        </p>
+                    )}
+                    <PasswordStrength password={data.password} />
                 </div>
+
+                {/* Confirm Password */}
+                <div>
+                    <label
+                        htmlFor="password_confirmation"
+                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                    >
+                        Confirmer le mot de passe
+                    </label>
+                    <div className="relative">
+                        <input
+                            id="password_confirmation"
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={data.password_confirmation}
+                            onChange={(e) =>
+                                setData("password_confirmation", e.target.value)
+                            }
+                            className={`
+                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-gray-50/50
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                                transition-all
+                                ${data.password_confirmation && !passwordsMatch ? "border-red-300" : "border-gray-200"}
+                                ${passwordsMatch ? "border-emerald-300" : ""}
+                            `}
+                            placeholder="••••••••••••"
+                            autoComplete="new-password"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                            }
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            {showConfirmPassword ? (
+                                <EyeOff className="w-5 h-5" />
+                            ) : (
+                                <Eye className="w-5 h-5" />
+                            )}
+                        </button>
+                    </div>
+                    {data.password_confirmation && !passwordsMatch && (
+                        <p className="mt-1.5 text-[12px] text-red-600">
+                            Les mots de passe ne correspondent pas
+                        </p>
+                    )}
+                    {passwordsMatch && (
+                        <p className="mt-1.5 text-[12px] text-emerald-600 flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" /> Les mots de passe
+                            correspondent
+                        </p>
+                    )}
+                </div>
+
+                {/* Terms */}
+                <div>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={data.terms}
+                            onChange={(e) => setData("terms", e.target.checked)}
+                            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="text-[13px] text-gray-600 leading-relaxed">
+                            J'accepte les{" "}
+                            <Link
+                                href="/terms"
+                                className="text-indigo-600 hover:underline"
+                            >
+                                Conditions d'utilisation
+                            </Link>{" "}
+                            et la{" "}
+                            <Link
+                                href="/privacy"
+                                className="text-indigo-600 hover:underline"
+                            >
+                                Politique de confidentialité
+                            </Link>
+                        </span>
+                    </label>
+                </div>
+
+                {/* Submit */}
+                <button
+                    type="submit"
+                    disabled={!formValid || processing}
+                    className={`
+                        w-full flex items-center justify-center gap-2
+                        px-6 py-3.5 rounded-xl text-[15px] font-semibold
+                        transition-all duration-200
+                        ${
+                            formValid && !processing
+                                ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/10"
+                                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        }
+                    `}
+                >
+                    {processing ? (
+                        <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Création en cours...
+                        </>
+                    ) : (
+                        "Créer mon compte"
+                    )}
+                </button>
+
+                {/* Login link */}
+                <p className="text-center text-[13px] text-gray-500">
+                    Déjà un compte ?{" "}
+                    <Link
+                        href="/login"
+                        className="text-indigo-600 font-medium hover:underline"
+                    >
+                        Se connecter
+                    </Link>
+                </p>
             </form>
-        </GuestLayout>
+        </AuthLayout>
     );
 }
