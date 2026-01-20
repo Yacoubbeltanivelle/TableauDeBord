@@ -38,4 +38,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/business', [DashboardController::class, 'business'])->name('business');
 });
 
+// Legal pages (public)
+Route::get('/terms', function () {
+    return Inertia::render('Legal/Terms');
+})->name('terms');
+
+Route::get('/privacy', function () {
+    return Inertia::render('Legal/Privacy');
+})->name('privacy');
+
 require __DIR__.'/auth.php';
