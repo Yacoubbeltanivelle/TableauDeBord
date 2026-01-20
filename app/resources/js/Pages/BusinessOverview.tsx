@@ -1,140 +1,248 @@
-import { Head } from '@inertiajs/react';
-import AppShell from '@/Layouts/AppShell';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
-import { Button } from '@/Components/ui/button';
-import { ArrowDownRight, ArrowUpRight, Download, Plus, Target, TrendingUp, Users } from 'lucide-react';
-
-interface KPI {
-    id: number;
-    name: string;
-    value: string;
-    change: number;
-    trend: 'up' | 'down';
-    icon: React.ElementType;
-}
+import { Head } from "@inertiajs/react";
+import AppShell from "@/Layouts/AppShell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import {
+    TrendingUp,
+    TrendingDown,
+    Minus,
+    Target,
+    BarChart3,
+    Plus,
+    Euro,
+    PiggyBank,
+} from "lucide-react";
 
 interface Objective {
-    id: number;
+    id: string;
     name: string;
-    target: number;
-    current: number;
+    target_value: number;
+    current_value: number;
     unit: string;
+    progress: number;
 }
 
-export default function BusinessOverview() {
-    // Placeholder data
-    const kpis: KPI[] = [
-        { id: 1, name: 'Revenue', value: '€12,500', change: 12, trend: 'up', icon: TrendingUp },
-        { id: 2, name: 'Clients', value: '8', change: 2, trend: 'up', icon: Users },
-        { id: 3, name: 'Tasks Done', value: '45', change: 15, trend: 'up', icon: Target },
-    ];
+interface Kpi {
+    id: string;
+    name: string;
+    value: number;
+    unit: string;
+    trend: "up" | "down" | "stable";
+}
 
-    const objectives: Objective[] = [
-        { id: 1, name: 'Q1 Revenue', target: 50000, current: 25000, unit: '€' },
-        { id: 2, name: 'New clients', target: 10, current: 8, unit: '' },
-        { id: 3, name: 'Launch MVP', target: 100, current: 40, unit: '%' },
-    ];
+interface BusinessOverviewProps {
+    objectives: Objective[];
+    kpis: Kpi[];
+}
+
+const trendIcons = {
+    up: <TrendingUp className="h-4 w-4 text-green-500" />,
+    down: <TrendingDown className="h-4 w-4 text-red-500" />,
+    stable: <Minus className="h-4 w-4 text-gray-400" />,
+};
+
+const trendColors = {
+    up: "text-green-500",
+    down: "text-red-500",
+    stable: "text-gray-500",
+};
+
+export default function BusinessOverview({
+    objectives,
+    kpis,
+}: BusinessOverviewProps) {
+    // Calculate totals (mock for now - will come from ledger entries later)
+    const totalRevenue = 32500;
+    const totalExpenses = 8200;
+    const netProfit = totalRevenue - totalExpenses;
 
     return (
-        <AppShell title="Business Overview">
-            <Head title="Business Overview" />
+        <AppShell title="Business">
+            <Head title="Business" />
 
             <div className="space-y-6">
+                {/* Financial Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Revenue
+                            </CardTitle>
+                            <Euro className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">
+                                {totalRevenue.toLocaleString("fr-FR")} €
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                This quarter
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Expenses
+                            </CardTitle>
+                            <PiggyBank className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-600">
+                                {totalExpenses.toLocaleString("fr-FR")} €
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                This quarter
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Net Profit
+                            </CardTitle>
+                            <TrendingUp className="h-4 w-4 text-green-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div
+                                className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600" : "text-red-600"}`}
+                            >
+                                {netProfit.toLocaleString("fr-FR")} €
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                This quarter
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
                 {/* KPIs */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {kpis.map((kpi) => {
-                        const Icon = kpi.icon;
-                        return (
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5" />
+                            Key Performance Indicators
+                        </h2>
+                        <Button variant="outline" size="sm" className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            Add KPI
+                        </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {kpis.map((kpi) => (
                             <Card key={kpi.id}>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                                        {kpi.name}
-                                    </CardTitle>
-                                    <Icon className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{kpi.value}</div>
-                                    <div className="mt-1 flex items-center text-xs">
-                                        {kpi.trend === 'up' ? (
-                                            <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
-                                        ) : (
-                                            <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
-                                        )}
-                                        <span
-                                            className={
-                                                kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                                            }
-                                        >
-                                            {kpi.trend === 'up' ? '+' : '-'}{kpi.change}%
-                                        </span>
-                                        <span className="ml-1 text-muted-foreground">
-                                            vs last month
-                                        </span>
+                                <CardContent className="pt-6">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">
+                                                {kpi.name}
+                                            </p>
+                                            <p className="text-2xl font-bold mt-1">
+                                                {kpi.value.toLocaleString(
+                                                    "fr-FR",
+                                                )}
+                                                {kpi.unit}
+                                            </p>
+                                        </div>
+                                        <div className={trendColors[kpi.trend]}>
+                                            {trendIcons[kpi.trend]}
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
-                        );
-                    })}
+                        ))}
+                    </div>
                 </div>
 
                 {/* Objectives */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Objectives</CardTitle>
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            Objectives
+                        </h2>
                         <Button variant="outline" size="sm" className="gap-2">
                             <Plus className="h-4 w-4" />
                             Add Objective
                         </Button>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {objectives.map((obj) => {
-                            const progress = Math.round((obj.current / obj.target) * 100);
-                            return (
-                                <div key={obj.id}>
-                                    <div className="mb-2 flex items-center justify-between">
-                                        <span className="font-medium text-foreground">{obj.name}</span>
-                                        <span className="text-sm text-muted-foreground">
-                                            {obj.unit === '€' ? `€${obj.current.toLocaleString()}` : obj.current}
-                                            {' / '}
-                                            {obj.unit === '€' ? `€${obj.target.toLocaleString()}` : `${obj.target}${obj.unit}`}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {objectives.map((obj) => (
+                            <Card key={obj.id}>
+                                <CardContent className="pt-6">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <h3 className="font-medium">
+                                            {obj.name}
+                                        </h3>
+                                        <span
+                                            className={`text-lg font-bold ${
+                                                obj.progress >= 100
+                                                    ? "text-green-600"
+                                                    : obj.progress >= 50
+                                                      ? "text-blue-600"
+                                                      : "text-orange-600"
+                                            }`}
+                                        >
+                                            {obj.progress}%
                                         </span>
                                     </div>
-                                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-500 ${
-                                                progress >= 80
-                                                    ? 'bg-green-500'
-                                                    : progress >= 50
-                                                      ? 'bg-yellow-500'
-                                                      : 'bg-primary'
-                                            }`}
-                                            style={{ width: `${Math.min(progress, 100)}%` }}
-                                        />
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">
+                                                Current
+                                            </span>
+                                            <span className="font-medium">
+                                                {obj.current_value.toLocaleString(
+                                                    "fr-FR",
+                                                )}
+                                                {obj.unit}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">
+                                                Target
+                                            </span>
+                                            <span className="font-medium">
+                                                {obj.target_value.toLocaleString(
+                                                    "fr-FR",
+                                                )}
+                                                {obj.unit}
+                                            </span>
+                                        </div>
+                                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full transition-all ${
+                                                    obj.progress >= 100
+                                                        ? "bg-green-500"
+                                                        : obj.progress >= 50
+                                                          ? "bg-blue-500"
+                                                          : "bg-orange-500"
+                                                }`}
+                                                style={{
+                                                    width: `${Math.min(obj.progress, 100)}%`,
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                    <p className="mt-1 text-right text-xs text-muted-foreground">
-                                        {progress}%
-                                    </p>
-                                </div>
-                            );
-                        })}
-                    </CardContent>
-                </Card>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
 
-                {/* Trend Chart Placeholder */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Trend (30 days)</CardTitle>
-                        <Button variant="outline" size="sm" className="gap-2">
-                            <Download className="h-4 w-4" />
-                            Export CSV
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30">
-                            <p className="text-muted-foreground">
-                                📈 Chart will be implemented here (Recharts or Chart.js)
-                            </p>
-                        </div>
+                {/* Ledger Coming Soon */}
+                <Card className="border-dashed">
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                        <Euro className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <h3 className="font-medium text-foreground mb-1">
+                            Ledger Entries
+                        </h3>
+                        <p className="text-sm">
+                            Transaction tracking coming soon...
+                        </p>
                     </CardContent>
                 </Card>
             </div>

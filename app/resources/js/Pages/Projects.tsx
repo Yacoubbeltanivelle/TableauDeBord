@@ -1,82 +1,103 @@
-import { Head } from '@inertiajs/react';
-import AppShell from '@/Layouts/AppShell';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
-import { Button } from '@/Components/ui/button';
-import { FolderKanban, Grid3X3, List, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { Head, router } from "@inertiajs/react";
+import AppShell from "@/Layouts/AppShell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { FolderKanban, Plus, Grid3X3, List, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 
 interface Project {
-    id: number;
+    id: string;
     name: string;
-    category: 'PROJECT' | 'AREA' | 'RESOURCE' | 'ARCHIVE';
+    description: string | null;
+    category: "PROJECT" | "AREA" | "RESOURCE" | "ARCHIVE";
+    status: string;
     color: string;
-    tasksCompleted: number;
-    tasksTotal: number;
-    status: 'active' | 'on_hold' | 'completed';
+    icon: string | null;
+    tasks_count: number;
+    completed_tasks_count: number;
+    progress: number;
 }
 
-export default function Projects() {
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [activeCategory, setActiveCategory] = useState<string>('all');
+interface ProjectsProps {
+    projects: Project[];
+}
 
-    // Placeholder data
-    const projects: Project[] = [
-        { id: 1, name: 'TableauDeBord', category: 'PROJECT', color: '#10B981', tasksCompleted: 8, tasksTotal: 10, status: 'active' },
-        { id: 2, name: 'Client ABC', category: 'PROJECT', color: '#6366F1', tasksCompleted: 6, tasksTotal: 10, status: 'active' },
-        { id: 3, name: 'Marketing', category: 'AREA', color: '#8B5CF6', tasksCompleted: 0, tasksTotal: 0, status: 'active' },
-        { id: 4, name: 'Learning', category: 'RESOURCE', color: '#F59E0B', tasksCompleted: 0, tasksTotal: 0, status: 'active' },
-    ];
+const categoryLabels = {
+    PROJECT: "Projects",
+    AREA: "Areas",
+    RESOURCE: "Resources",
+    ARCHIVE: "Archives",
+};
 
-    const categories = [
-        { id: 'all', label: 'All' },
-        { id: 'PROJECT', label: 'Projects' },
-        { id: 'AREA', label: 'Areas' },
-        { id: 'RESOURCE', label: 'Resources' },
-        { id: 'ARCHIVE', label: 'Archives' },
-    ];
+const categoryColors = {
+    PROJECT: "bg-blue-500",
+    AREA: "bg-green-500",
+    RESOURCE: "bg-purple-500",
+    ARCHIVE: "bg-gray-400",
+};
 
-    const filteredProjects = activeCategory === 'all' 
-        ? projects 
-        : projects.filter(p => p.category === activeCategory);
+export default function Projects({ projects }: ProjectsProps) {
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+    const [filter, setFilter] = useState<string>("all");
+
+    const filteredProjects =
+        filter === "all"
+            ? projects
+            : projects.filter((p) => p.category === filter);
+
+    const groupedProjects = filteredProjects.reduce(
+        (acc, project) => {
+            if (!acc[project.category]) acc[project.category] = [];
+            acc[project.category].push(project);
+            return acc;
+        },
+        {} as Record<string, Project[]>,
+    );
 
     return (
         <AppShell title="Projects">
             <Head title="Projects" />
 
             <div className="space-y-6">
-                {/* Toolbar */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex gap-2">
-                        {categories.map((cat) => (
-                            <Button
-                                key={cat.id}
-                                variant={activeCategory === cat.id ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setActiveCategory(cat.id)}
-                            >
-                                {cat.label}
-                            </Button>
-                        ))}
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        {["all", "PROJECT", "AREA", "RESOURCE", "ARCHIVE"].map(
+                            (cat) => (
+                                <Button
+                                    key={cat}
+                                    variant={
+                                        filter === cat ? "default" : "outline"
+                                    }
+                                    size="sm"
+                                    onClick={() => setFilter(cat)}
+                                >
+                                    {cat === "all"
+                                        ? "All"
+                                        : categoryLabels[
+                                              cat as keyof typeof categoryLabels
+                                          ]}
+                                </Button>
+                            ),
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="flex rounded-lg border border-border">
-                            <Button
-                                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="rounded-r-none"
-                                onClick={() => setViewMode('grid')}
-                            >
-                                <Grid3X3 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="rounded-l-none"
-                                onClick={() => setViewMode('list')}
-                            >
-                                <List className="h-4 w-4" />
-                            </Button>
-                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setViewMode("grid")}
+                            className={viewMode === "grid" ? "bg-accent" : ""}
+                        >
+                            <Grid3X3 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setViewMode("list")}
+                            className={viewMode === "list" ? "bg-accent" : ""}
+                        >
+                            <List className="h-4 w-4" />
+                        </Button>
                         <Button className="gap-2">
                             <Plus className="h-4 w-4" />
                             New Project
@@ -84,62 +105,96 @@ export default function Projects() {
                     </div>
                 </div>
 
-                {/* Projects Grid */}
-                <div className={viewMode === 'grid' 
-                    ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3' 
-                    : 'space-y-3'
-                }>
-                    {filteredProjects.map((project) => (
-                        <Card 
-                            key={project.id} 
-                            className="cursor-pointer transition-shadow hover:shadow-md"
-                        >
-                            <CardHeader className="pb-2">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="flex h-10 w-10 items-center justify-center rounded-lg"
-                                            style={{ backgroundColor: `${project.color}20` }}
-                                        >
-                                            <FolderKanban
-                                                className="h-5 w-5"
-                                                style={{ color: project.color }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <CardTitle className="text-base">{project.name}</CardTitle>
-                                            <p className="text-xs text-muted-foreground">
-                                                {project.category}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {project.tasksTotal > 0 ? (
-                                    <>
-                                        <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-secondary">
-                                            <div
-                                                className="h-full transition-all duration-500"
-                                                style={{
-                                                    width: `${(project.tasksCompleted / project.tasksTotal) * 100}%`,
-                                                    backgroundColor: project.color,
-                                                }}
-                                            />
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            {project.tasksCompleted}/{project.tasksTotal} tasks
-                                        </p>
-                                    </>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">
-                                        {project.category === 'AREA' ? 'Ongoing' : 'Reference'}
-                                    </p>
-                                )}
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                {/* Projects Grid/List */}
+                {Object.entries(groupedProjects).map(
+                    ([category, categoryProjects]) => (
+                        <div key={category}>
+                            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                <div
+                                    className={`w-2 h-2 rounded-full ${categoryColors[category as keyof typeof categoryColors]}`}
+                                />
+                                {
+                                    categoryLabels[
+                                        category as keyof typeof categoryLabels
+                                    ]
+                                }
+                                <span className="text-sm text-muted-foreground font-normal">
+                                    ({categoryProjects.length})
+                                </span>
+                            </h2>
+
+                            <div
+                                className={
+                                    viewMode === "grid"
+                                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                                        : "space-y-2"
+                                }
+                            >
+                                {categoryProjects.map((project) => (
+                                    <Card
+                                        key={project.id}
+                                        className="hover:shadow-md transition-shadow cursor-pointer group"
+                                        style={{
+                                            borderLeftColor: project.color,
+                                            borderLeftWidth: "4px",
+                                        }}
+                                    >
+                                        <CardContent className="p-4">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xl">
+                                                        {project.icon || "📁"}
+                                                    </span>
+                                                    <div>
+                                                        <h3 className="font-semibold group-hover:text-primary transition-colors">
+                                                            {project.name}
+                                                        </h3>
+                                                        {project.description && (
+                                                            <p className="text-sm text-muted-foreground line-clamp-1">
+                                                                {
+                                                                    project.description
+                                                                }
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3 flex items-center justify-between text-sm">
+                                                <span className="text-muted-foreground flex items-center gap-1">
+                                                    <CheckCircle2 className="h-3 w-3" />
+                                                    {
+                                                        project.completed_tasks_count
+                                                    }
+                                                    /{project.tasks_count} tasks
+                                                </span>
+                                                <span className="font-medium">
+                                                    {project.progress}%
+                                                </span>
+                                            </div>
+
+                                            <div className="mt-2 h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-primary transition-all"
+                                                    style={{
+                                                        width: `${project.progress}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    ),
+                )}
+
+                {filteredProjects.length === 0 && (
+                    <div className="text-center py-16 text-muted-foreground">
+                        <FolderKanban className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No projects found.</p>
+                    </div>
+                )}
             </div>
         </AppShell>
     );
