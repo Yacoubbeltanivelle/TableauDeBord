@@ -63,7 +63,18 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
     };
 
     const formatTimeAgo = (dateStr: string) => {
+        // Handle already-formatted relative time strings
+        if (dateStr.startsWith("Il y a") || dateStr.includes("ago")) {
+            return dateStr;
+        }
+
         const date = new Date(dateStr);
+
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            return dateStr; // Return original if can't parse
+        }
+
         const now = new Date();
         const diff = Math.floor((now.getTime() - date.getTime()) / 1000 / 60);
 
