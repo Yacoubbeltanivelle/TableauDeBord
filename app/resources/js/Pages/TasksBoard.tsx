@@ -37,7 +37,7 @@ interface TasksBoardProps {
 }
 
 const columnConfig = {
-    TODO: { title: "À faire", color: "bg-gray-500" },
+    TODO: { title: "À faire", color: "bg-muted" },
     IN_PROGRESS: { title: "En cours", color: "bg-blue-500" },
     BLOCKED: { title: "Bloqué", color: "bg-red-500" },
     DONE: { title: "Terminé", color: "bg-green-500" },
@@ -47,7 +47,7 @@ const priorityColors: Record<string, string> = {
     urgent: "border-l-red-500",
     high: "border-l-orange-500",
     medium: "border-l-yellow-500",
-    low: "border-l-gray-300",
+    low: "border-l-border",
 };
 
 export default function TasksBoard({ columns, wipLimit }: TasksBoardProps) {

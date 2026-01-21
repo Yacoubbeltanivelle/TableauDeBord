@@ -33,7 +33,7 @@ const categoryColors = {
     PROJECT: "bg-blue-500",
     AREA: "bg-green-500",
     RESOURCE: "bg-purple-500",
-    ARCHIVE: "bg-gray-400",
+    ARCHIVE: "bg-muted",
 };
 
 export default function Projects({ projects }: ProjectsProps) {

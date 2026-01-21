@@ -94,7 +94,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
         urgent: "bg-red-100 text-red-800 border border-red-200",
         high: "bg-orange-100 text-orange-800 border border-orange-200",
         medium: "bg-amber-100 text-amber-800 border border-amber-200",
-        low: "bg-gray-100 text-gray-700 border border-gray-200",
+        low: "bg-secondary text-secondary-foreground border border-border",
     };
 
     const filteredTasks = hideCompleted
@@ -124,7 +124,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                             {stats.completed} sur {stats.total} tâches terminées
                         </p>
                         {/* Enhanced progress bar */}
-                        <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-gray-200">
+                        <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-secondary">
                             <div
                                 className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-700 ease-out"
                                 style={{ width: `${stats.progress}%` }}
@@ -311,7 +311,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                             </h2>
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="p-2 hover:bg-gray-100 rounded-full"
+                                className="p-2 hover:bg-accent rounded-full"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -441,7 +441,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                             </h2>
                             <button
                                 onClick={() => setEditingTask(null)}
-                                className="p-2 hover:bg-gray-100 rounded-full"
+                                className="p-2 hover:bg-accent rounded-full"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -449,7 +449,9 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
 
                         <div className="space-y-4">
                             <div>
-                                <Label className="text-gray-500">Titre</Label>
+                                <Label className="text-muted-foreground">
+                                    Titre
+                                </Label>
                                 <p className="font-medium text-lg">
                                     {editingTask.title}
                                 </p>
@@ -457,10 +459,10 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
 
                             {editingTask.description && (
                                 <div>
-                                    <Label className="text-gray-500">
+                                    <Label className="text-muted-foreground">
                                         Description
                                     </Label>
-                                    <p className="text-gray-700">
+                                    <p className="text-secondary-foreground">
                                         {editingTask.description}
                                     </p>
                                 </div>
@@ -468,7 +470,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label className="text-gray-500">
+                                    <Label className="text-muted-foreground">
                                         Priorité
                                     </Label>
                                     <span
@@ -485,7 +487,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                     </span>
                                 </div>
                                 <div>
-                                    <Label className="text-gray-500">
+                                    <Label className="text-muted-foreground">
                                         Statut
                                     </Label>
                                     <p className="font-medium">
@@ -498,7 +500,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
 
                             {editingTask.project && (
                                 <div>
-                                    <Label className="text-gray-500">
+                                    <Label className="text-muted-foreground">
                                         Projet
                                     </Label>
                                     <p className="flex items-center gap-1">
@@ -510,7 +512,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
 
                             {editingTask.due_date && (
                                 <div>
-                                    <Label className="text-gray-500">
+                                    <Label className="text-muted-foreground">
                                         Échéance
                                     </Label>
                                     <p className="flex items-center gap-1">
