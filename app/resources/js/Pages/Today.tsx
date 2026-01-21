@@ -55,6 +55,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
 
     const { data, setData, post, processing, reset, errors } = useForm({
         title: "",
+        description: "",
         priority: "medium",
         due_date: "",
         project_id: "",
@@ -334,6 +335,42 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                         {errors.title}
                                     </p>
                                 )}
+                            </div>
+
+                            <div>
+                                <Label htmlFor="description">Description</Label>
+                                <textarea
+                                    id="description"
+                                    value={data.description}
+                                    onChange={(e) =>
+                                        setData("description", e.target.value)
+                                    }
+                                    placeholder="Détails supplémentaires (optionnel)"
+                                    rows={3}
+                                    className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="project_id">Projet</Label>
+                                <select
+                                    id="project_id"
+                                    value={data.project_id}
+                                    onChange={(e) =>
+                                        setData("project_id", e.target.value)
+                                    }
+                                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                                >
+                                    <option value="">Aucun projet</option>
+                                    {projects.map((project) => (
+                                        <option
+                                            key={project.id}
+                                            value={project.id}
+                                        >
+                                            {project.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

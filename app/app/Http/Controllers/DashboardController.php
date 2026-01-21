@@ -47,6 +47,12 @@ class DashboardController extends Controller
         $totalCount = $todayTasks->count();
         $progressPercent = $totalCount > 0 ? round(($completedCount / $totalCount) * 100) : 0;
 
+        // Fetch projects for task creation dropdown
+        $projects = Project::where('user_id', $user->id)
+            ->whereIn('category', ['PROJECT', 'AREA'])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('Today', [
             'tasks' => $todayTasks,
             'stats' => [
@@ -54,6 +60,7 @@ class DashboardController extends Controller
                 'total' => $totalCount,
                 'progress' => $progressPercent,
             ],
+            'projects' => $projects,
         ]);
     }
 
