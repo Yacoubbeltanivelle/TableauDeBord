@@ -56,7 +56,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
     const { data, setData, post, processing, reset, errors } = useForm({
         title: "",
         description: "",
-        priority: "medium",
+        priority: "MEDIUM",
         due_date: "",
         project_id: "",
         is_today: true,
@@ -384,10 +384,10 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                         }
                                         className="w-full h-10 px-3 rounded-md border border-input bg-background"
                                     >
-                                        <option value="low">Basse</option>
-                                        <option value="medium">Moyenne</option>
-                                        <option value="high">Haute</option>
-                                        <option value="urgent">Urgente</option>
+                                        <option value="LOW">Basse</option>
+                                        <option value="MEDIUM">Moyenne</option>
+                                        <option value="HIGH">Haute</option>
+                                        <option value="URGENT">Urgente</option>
                                     </select>
                                 </div>
                                 <div>
