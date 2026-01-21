@@ -23,9 +23,9 @@ interface ProjectsProps {
 }
 
 const categoryLabels = {
-    PROJECT: "Projects",
-    AREA: "Areas",
-    RESOURCE: "Resources",
+    PROJECT: "Projets",
+    AREA: "Domaines",
+    RESOURCE: "Ressources",
     ARCHIVE: "Archives",
 };
 
@@ -73,7 +73,7 @@ export default function Projects({ projects }: ProjectsProps) {
                                     onClick={() => setFilter(cat)}
                                 >
                                     {cat === "all"
-                                        ? "All"
+                                        ? "Tous"
                                         : categoryLabels[
                                               cat as keyof typeof categoryLabels
                                           ]}
@@ -100,7 +100,7 @@ export default function Projects({ projects }: ProjectsProps) {
                         </Button>
                         <Button className="gap-2">
                             <Plus className="h-4 w-4" />
-                            New Project
+                            Nouveau projet
                         </Button>
                     </div>
                 </div>
@@ -166,7 +166,8 @@ export default function Projects({ projects }: ProjectsProps) {
                                                     {
                                                         project.completed_tasks_count
                                                     }
-                                                    /{project.tasks_count} tasks
+                                                    /{project.tasks_count}{" "}
+                                                    tâches
                                                 </span>
                                                 <span className="font-medium">
                                                     {project.progress}%
@@ -192,7 +193,7 @@ export default function Projects({ projects }: ProjectsProps) {
                 {filteredProjects.length === 0 && (
                     <div className="text-center py-16 text-muted-foreground">
                         <FolderKanban className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>No projects found.</p>
+                        <p>Aucun projet trouvé.</p>
                     </div>
                 )}
             </div>

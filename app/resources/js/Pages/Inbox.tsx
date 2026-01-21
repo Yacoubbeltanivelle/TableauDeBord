@@ -1,8 +1,8 @@
-import { Head, router, useForm } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import AppShell from "@/Layouts/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
-import { Inbox, Plus, Sun, Trash2, ArrowRight } from "lucide-react";
+import { Inbox, Plus, Sun, Trash2, Clock } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 
 interface InboxItem {
@@ -25,19 +25,24 @@ interface InboxProps {
 
 export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
     const [quickCapture, setQuickCapture] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     const handleQuickCapture: FormEventHandler = (e) => {
         e.preventDefault();
         if (!quickCapture.trim()) return;
 
+        setIsSubmitting(true);
         router.post(
             "/api/inbox",
-            {
-                content: quickCapture,
-            },
+            { content: quickCapture },
             {
                 preserveScroll: true,
-                onSuccess: () => setQuickCapture(""),
+                onSuccess: () => {
+                    setQuickCapture("");
+                    setIsSubmitting(false);
+                },
+                onError: () => setIsSubmitting(false),
             },
         );
     };
@@ -46,29 +51,41 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
         router.patch(
             `/api/tasks/${taskId}/today`,
             {},
-            {
-                preserveScroll: true,
-            },
+            { preserveScroll: true },
         );
     };
 
     const deleteItem = (itemId: string) => {
         router.delete(`/api/inbox/${itemId}`, {
             preserveScroll: true,
+            onSuccess: () => setDeleteConfirmId(null),
         });
     };
 
+    const formatTimeAgo = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = Math.floor((now.getTime() - date.getTime()) / 1000 / 60);
+
+        if (diff < 1) return "À l'instant";
+        if (diff < 60) return `Il y a ${diff} min`;
+        if (diff < 1440) return `Il y a ${Math.floor(diff / 60)}h`;
+        return `Il y a ${Math.floor(diff / 1440)}j`;
+    };
+
+    const totalItems = inboxItems.length + inboxTasks.length;
+
     return (
-        <AppShell title="Inbox">
-            <Head title="Inbox" />
+        <AppShell title="Boîte de réception">
+            <Head title="Boîte de réception" />
 
             <div className="space-y-6">
                 {/* Quick Capture */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Plus className="h-5 w-5" />
-                            Quick Capture
+                <Card className="overflow-hidden">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                            <Plus className="h-5 w-5 text-primary" />
+                            Capture rapide
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -82,14 +99,15 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                 onChange={(e) =>
                                     setQuickCapture(e.target.value)
                                 }
-                                placeholder="What's on your mind? Press Enter to capture..."
-                                className="flex-1 px-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Qu'avez-vous en tête ? Appuyez sur Entrée..."
+                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                             />
                             <Button
                                 type="submit"
-                                disabled={!quickCapture.trim()}
+                                disabled={!quickCapture.trim() || isSubmitting}
+                                className="px-6"
                             >
-                                Capture
+                                {isSubmitting ? "..." : "Capturer"}
                             </Button>
                         </form>
                     </CardContent>
@@ -97,19 +115,26 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
 
                 {/* Inbox Items */}
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
                             <Inbox className="h-5 w-5" />
-                            Inbox Items
+                            Éléments à traiter
                         </CardTitle>
+                        {totalItems > 0 && (
+                            <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                                {totalItems} élément{totalItems > 1 ? "s" : ""}
+                            </span>
+                        )}
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        {inboxItems.length === 0 && inboxTasks.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <Inbox className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                <p>Your inbox is empty!</p>
-                                <p className="text-sm">
-                                    Capture ideas and tasks above.
+                        {totalItems === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground">
+                                <Inbox className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                                <p className="text-lg font-medium">
+                                    Boîte de réception vide !
+                                </p>
+                                <p className="text-sm mt-1">
+                                    Capturez vos idées et tâches ci-dessus.
                                 </p>
                             </div>
                         ) : (
@@ -118,30 +143,61 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                 {inboxItems.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="flex items-center gap-3 rounded-lg border border-dashed p-3 bg-muted/30"
+                                        className="group flex items-center gap-3 rounded-xl border border-dashed border-gray-300 p-4 bg-gray-50/50 hover:bg-white hover:border-gray-400 transition-all"
                                     >
-                                        <div className="flex-1">
-                                            <p className="text-sm">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900">
                                                 {item.content}
                                             </p>
-                                            <span className="text-xs text-muted-foreground">
-                                                {item.created_at}
+                                            <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                                <Clock className="h-3 w-3" />
+                                                {formatTimeAgo(item.created_at)}
                                             </span>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <Button variant="outline" size="sm">
-                                                → Task
-                                            </Button>
+                                        <div className="flex gap-2 shrink-0">
                                             <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                onClick={() =>
-                                                    deleteItem(item.id)
-                                                }
+                                                variant="outline"
+                                                size="sm"
+                                                className="gap-1"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Plus className="h-3 w-3" />
+                                                Créer tâche
                                             </Button>
+                                            {deleteConfirmId === item.id ? (
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() =>
+                                                            deleteItem(item.id)
+                                                        }
+                                                        className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                                                    >
+                                                        Oui
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            setDeleteConfirmId(
+                                                                null,
+                                                            )
+                                                        }
+                                                        className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+                                                    >
+                                                        Non
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    onClick={() =>
+                                                        setDeleteConfirmId(
+                                                            item.id,
+                                                        )
+                                                    }
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -150,19 +206,20 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                 {inboxTasks.map((task) => (
                                     <div
                                         key={task.id}
-                                        className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                                        className="group flex items-center gap-3 rounded-xl border p-4 hover:shadow-sm hover:bg-white transition-all"
                                     >
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-gray-900">
                                                 {task.title}
                                             </p>
-                                            <span className="text-xs text-muted-foreground">
-                                                {task.created_at}
+                                            <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                                <Clock className="h-3 w-3" />
+                                                {formatTimeAgo(task.created_at)}
                                             </span>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 shrink-0">
                                             <Button
-                                                variant="outline"
+                                                variant="default"
                                                 size="sm"
                                                 onClick={() =>
                                                     moveToToday(task.id)
@@ -170,7 +227,7 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                                 className="gap-1"
                                             >
                                                 <Sun className="h-3 w-3" />
-                                                Today
+                                                Aujourd'hui
                                             </Button>
                                         </div>
                                     </div>

@@ -90,10 +90,10 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
     };
 
     const priorityColors = {
-        urgent: "bg-red-100 text-red-700",
-        high: "bg-orange-100 text-orange-700",
-        medium: "bg-yellow-100 text-yellow-700",
-        low: "bg-gray-100 text-gray-600",
+        urgent: "bg-red-100 text-red-800 border border-red-200",
+        high: "bg-orange-100 text-orange-800 border border-orange-200",
+        medium: "bg-amber-100 text-amber-800 border border-amber-200",
+        low: "bg-gray-100 text-gray-700 border border-gray-200",
     };
 
     const filteredTasks = hideCompleted
