@@ -190,8 +190,8 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                     key={task.id}
                                     className={`group flex items-center gap-3 rounded-xl border p-4 transition-all duration-200 ${
                                         task.completed
-                                            ? "border-gray-200 bg-gray-50/50"
-                                            : "border-gray-200 hover:border-gray-300 hover:shadow-sm hover:bg-white"
+                                            ? "border-border bg-muted/30 opacity-60"
+                                            : "border-border bg-card hover:border-primary/30 hover:shadow-sm"
                                     }`}
                                 >
                                     {/* Checkbox */}
@@ -202,7 +202,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                         {task.completed ? (
                                             <CheckCircle2 className="h-6 w-6 text-green-500" />
                                         ) : (
-                                            <Circle className="h-6 w-6 text-gray-300 hover:text-gray-400 transition-colors" />
+                                            <Circle className="h-6 w-6 text-muted-foreground hover:text-foreground transition-colors" />
                                         )}
                                     </button>
 
@@ -214,8 +214,8 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                         <span
                                             className={`block font-medium ${
                                                 task.completed
-                                                    ? "text-gray-400 line-through"
-                                                    : "text-gray-900"
+                                                    ? "text-muted-foreground line-through"
+                                                    : "text-foreground"
                                             }`}
                                         >
                                             {task.title}
@@ -237,7 +237,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                     {/* Right side - meta info */}
                                     <div className="flex items-center gap-3 shrink-0">
                                         {task.due_date && (
-                                            <span className="flex items-center gap-1 text-xs text-gray-500">
+                                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                 <Calendar className="h-3 w-3" />
                                                 {new Date(
                                                     task.due_date,
@@ -273,7 +273,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                                     onClick={() =>
                                                         setDeleteConfirmId(null)
                                                     }
-                                                    className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
+                                                    className="px-2 py-1 text-xs bg-secondary text-secondary-foreground rounded hover:bg-muted transition-colors"
                                                 >
                                                     Non
                                                 </button>
@@ -284,7 +284,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                                     e.stopPropagation();
                                                     setDeleteConfirmId(task.id);
                                                 }}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded"
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
                                             >
                                                 <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
                                             </button>
