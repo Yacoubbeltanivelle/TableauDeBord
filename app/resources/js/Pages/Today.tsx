@@ -69,10 +69,13 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
         );
     };
 
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
     const deleteTask = (taskId: string) => {
-        if (confirm("Supprimer cette tâche ?")) {
-            router.delete(`/api/tasks/${taskId}`, { preserveScroll: true });
-        }
+        router.delete(`/api/tasks/${taskId}`, {
+            preserveScroll: true,
+            onSuccess: () => setDeleteConfirmId(null),
+        });
     };
 
     const submitNewTask = (e: React.FormEvent) => {
@@ -254,13 +257,37 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                                                     ? "Moyenne"
                                                     : "Basse"}
                                         </span>
-                                        {/* Delete button - visible on hover */}
-                                        <button
-                                            onClick={() => deleteTask(task.id)}
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded"
-                                        >
-                                            <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
-                                        </button>
+                                        {/* Delete button with confirmation */}
+                                        {deleteConfirmId === task.id ? (
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() =>
+                                                        deleteTask(task.id)
+                                                    }
+                                                    className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                                >
+                                                    Oui
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        setDeleteConfirmId(null)
+                                                    }
+                                                    className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
+                                                >
+                                                    Non
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDeleteConfirmId(task.id);
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded"
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))
