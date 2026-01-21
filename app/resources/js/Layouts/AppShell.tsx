@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from "@inertiajs/react";
 import {
     CalendarDays,
     ChevronLeft,
@@ -6,21 +6,22 @@ import {
     FolderKanban,
     Inbox,
     LayoutDashboard,
+    Moon,
     NotebookPen,
     PanelRight,
     Sun,
     TrendingUp,
-} from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/Components/ui/button';
-import { ScrollArea } from '@/Components/ui/scroll-area';
-import { Separator } from '@/Components/ui/separator';
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Button } from "@/Components/ui/button";
+import { ScrollArea } from "@/Components/ui/scroll-area";
+import { Separator } from "@/Components/ui/separator";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from '@/Components/ui/tooltip';
+} from "@/Components/ui/tooltip";
 
 interface NavItem {
     name: string;
@@ -30,13 +31,33 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { name: 'Today', href: '/today', icon: Sun, routeName: 'today' },
-    { name: 'Inbox', href: '/inbox', icon: Inbox, routeName: 'inbox' },
-    { name: 'Tasks Board', href: '/tasks', icon: LayoutDashboard, routeName: 'tasks' },
-    { name: 'Projects', href: '/projects', icon: FolderKanban, routeName: 'projects' },
-    { name: 'Notes', href: '/notes', icon: NotebookPen, routeName: 'notes' },
-    { name: 'Calendar', href: '/calendar', icon: CalendarDays, routeName: 'calendar' },
-    { name: 'Business', href: '/business', icon: TrendingUp, routeName: 'business' },
+    { name: "Today", href: "/today", icon: Sun, routeName: "today" },
+    { name: "Inbox", href: "/inbox", icon: Inbox, routeName: "inbox" },
+    {
+        name: "Tasks Board",
+        href: "/tasks",
+        icon: LayoutDashboard,
+        routeName: "tasks",
+    },
+    {
+        name: "Projects",
+        href: "/projects",
+        icon: FolderKanban,
+        routeName: "projects",
+    },
+    { name: "Notes", href: "/notes", icon: NotebookPen, routeName: "notes" },
+    {
+        name: "Calendar",
+        href: "/calendar",
+        icon: CalendarDays,
+        routeName: "calendar",
+    },
+    {
+        name: "Business",
+        href: "/business",
+        icon: TrendingUp,
+        routeName: "business",
+    },
 ];
 
 interface SidebarProps {
@@ -50,7 +71,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     return (
         <aside
             className={`fixed left-0 top-0 z-40 h-screen border-r border-border bg-card transition-all duration-300 ${
-                collapsed ? 'w-16' : 'w-64'
+                collapsed ? "w-16" : "w-64"
             }`}
         >
             <div className="flex h-16 items-center justify-between border-b border-border px-4">
@@ -59,16 +80,22 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                             🎯
                         </div>
-                        <span className="font-bold text-foreground">TableauDeBord</span>
+                        <span className="font-bold text-foreground">
+                            TableauDeBord
+                        </span>
                     </Link>
                 )}
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onToggle}
-                    className={collapsed ? 'mx-auto' : ''}
+                    className={collapsed ? "mx-auto" : ""}
                 >
-                    {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                    {collapsed ? (
+                        <ChevronRight className="h-4 w-4" />
+                    ) : (
+                        <ChevronLeft className="h-4 w-4" />
+                    )}
                 </Button>
             </div>
 
@@ -84,9 +111,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                                     href={item.href}
                                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                                         isActive
-                                            ? 'bg-primary text-primary-foreground'
-                                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                                    } ${collapsed ? 'justify-center' : ''}`}
+                                            ? "bg-primary text-primary-foreground"
+                                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                    } ${collapsed ? "justify-center" : ""}`}
                                 >
                                     <Icon className="h-5 w-5 shrink-0" />
                                     {!collapsed && <span>{item.name}</span>}
@@ -96,7 +123,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                             if (collapsed) {
                                 return (
                                     <Tooltip key={item.name}>
-                                        <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+                                        <TooltipTrigger asChild>
+                                            {linkContent}
+                                        </TooltipTrigger>
                                         <TooltipContent side="right">
                                             <p>{item.name}</p>
                                         </TooltipContent>
@@ -120,21 +149,74 @@ interface TopbarProps {
     title?: string;
 }
 
-export function Topbar({ sidebarCollapsed, rightPanelOpen, onToggleRightPanel, title }: TopbarProps) {
+export function Topbar({
+    sidebarCollapsed,
+    rightPanelOpen,
+    onToggleRightPanel,
+    title,
+}: TopbarProps) {
     const user = usePage().props.auth.user;
+    const [isDark, setIsDark] = useState(false);
+
+    useEffect(() => {
+        // Check localStorage and system preference on mount
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+        ).matches;
+        const shouldBeDark = stored === "dark" || (!stored && prefersDark);
+
+        setIsDark(shouldBeDark);
+        document.documentElement.classList.toggle("dark", shouldBeDark);
+    }, []);
+
+    const toggleTheme = () => {
+        const newIsDark = !isDark;
+        setIsDark(newIsDark);
+        document.documentElement.classList.toggle("dark", newIsDark);
+        localStorage.setItem("theme", newIsDark ? "dark" : "light");
+    };
 
     return (
         <header
             className={`fixed top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur transition-all duration-300 ${
-                sidebarCollapsed ? 'left-16' : 'left-64'
-            } ${rightPanelOpen ? 'right-80' : 'right-0'}`}
+                sidebarCollapsed ? "left-16" : "left-64"
+            } ${rightPanelOpen ? "right-80" : "right-0"}`}
         >
             <div className="flex items-center gap-4">
-                {title && <h1 className="text-xl font-semibold text-foreground">{title}</h1>}
+                {title && (
+                    <h1 className="text-xl font-semibold text-foreground">
+                        {title}
+                    </h1>
+                )}
             </div>
 
             <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={onToggleRightPanel}>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={toggleTheme}
+                            >
+                                {isDark ? (
+                                    <Sun className="h-5 w-5" />
+                                ) : (
+                                    <Moon className="h-5 w-5" />
+                                )}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{isDark ? "Mode clair" : "Mode sombre"}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onToggleRightPanel}
+                >
                     <PanelRight className="h-5 w-5" />
                 </Button>
                 <Separator orientation="vertical" className="h-6" />
@@ -143,9 +225,11 @@ export function Topbar({ sidebarCollapsed, rightPanelOpen, onToggleRightPanel, t
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                        {user?.name?.charAt(0)?.toUpperCase() || "U"}
                     </div>
-                    <span className="hidden sm:inline">{user?.name || 'User'}</span>
+                    <span className="hidden sm:inline">
+                        {user?.name || "User"}
+                    </span>
                 </Link>
             </div>
         </header>
@@ -167,13 +251,17 @@ export function RightPanel({ open }: RightPanelProps) {
             <ScrollArea className="h-[calc(100vh-4rem)] p-4">
                 <div className="space-y-4">
                     <div className="rounded-lg border border-border bg-muted/50 p-4">
-                        <h3 className="mb-2 text-sm font-medium text-foreground">Today's Focus</h3>
+                        <h3 className="mb-2 text-sm font-medium text-foreground">
+                            Today's Focus
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                             No tasks yet. Add your first task!
                         </p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/50 p-4">
-                        <h3 className="mb-2 text-sm font-medium text-foreground">Upcoming</h3>
+                        <h3 className="mb-2 text-sm font-medium text-foreground">
+                            Upcoming
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                             Nothing scheduled this week.
                         </p>
@@ -209,8 +297,8 @@ export default function AppShell({ children, title }: AppShellProps) {
 
             <main
                 className={`pt-16 transition-all duration-300 ${
-                    sidebarCollapsed ? 'ml-16' : 'ml-64'
-                } ${rightPanelOpen ? 'mr-80' : 'mr-0'}`}
+                    sidebarCollapsed ? "ml-16" : "ml-64"
+                } ${rightPanelOpen ? "mr-80" : "mr-0"}`}
             >
                 <div className="p-6">{children}</div>
             </main>
