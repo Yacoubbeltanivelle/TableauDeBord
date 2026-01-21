@@ -50,7 +50,7 @@ export default function Notes({ notes }: NotesProps) {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <input
                                 type="text"
-                                placeholder="Search notes..."
+                                placeholder="Rechercher des notes..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-9 pr-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -66,7 +66,7 @@ export default function Notes({ notes }: NotesProps) {
                         {pinnedNotes.length > 0 && (
                             <>
                                 <p className="text-xs font-medium text-muted-foreground px-2 py-1">
-                                    Pinned
+                                    Épinglées
                                 </p>
                                 {pinnedNotes.map((note) => (
                                     <NoteItem
@@ -97,7 +97,7 @@ export default function Notes({ notes }: NotesProps) {
 
                         {filteredNotes.length === 0 && (
                             <div className="text-center py-8 text-muted-foreground text-sm">
-                                No notes found
+                                Aucune note trouvée
                             </div>
                         )}
                     </div>
@@ -140,7 +140,7 @@ export default function Notes({ notes }: NotesProps) {
                         <div className="flex-1 flex items-center justify-center text-muted-foreground">
                             <div className="text-center">
                                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                <p>Select a note to view</p>
+                                <p>Sélectionnez une note à afficher</p>
                             </div>
                         </div>
                     )}

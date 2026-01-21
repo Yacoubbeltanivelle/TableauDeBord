@@ -153,7 +153,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                                             ))}
                                         {dayEvents.length > 2 && (
                                             <div className="text-xs text-muted-foreground px-1">
-                                                +{dayEvents.length - 2} more
+                                                +{dayEvents.length - 2} de plus
                                             </div>
                                         )}
                                     </div>
@@ -176,7 +176,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                                           month: "long",
                                       },
                                   )
-                                : "Select a date"}
+                                : "Sélectionnez une date"}
                         </CardTitle>
                         <Button size="icon" variant="outline">
                             <Plus className="h-4 w-4" />
@@ -186,7 +186,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                         {selectedEvents.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground text-sm">
                                 <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                No events
+                                Aucun événement
                             </div>
                         ) : (
                             selectedEvents.map((event) => (
@@ -222,7 +222,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                                         )}
                                         {event.all_day && (
                                             <span className="text-xs bg-secondary px-2 py-0.5 rounded">
-                                                All day
+                                                Toute la journée
                                             </span>
                                         )}
                                     </div>
