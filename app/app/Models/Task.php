@@ -24,7 +24,8 @@ class Task extends Model
         'is_today',
         'estimated_minutes',
         'completed_at',
-        'order',
+        'completed_at',
+        'position',
     ];
 
     protected $casts = [
@@ -34,7 +35,7 @@ class Task extends Model
         'is_today' => 'boolean',
         'estimated_minutes' => 'integer',
         'completed_at' => 'datetime',
-        'order' => 'integer',
+        'position' => 'integer',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -87,7 +88,7 @@ class Task extends Model
 
     public function scopeOrdered($query)
     {
-        return $query->orderBy('order')->orderBy('created_at');
+        return $query->orderBy('position')->orderBy('created_at');
     }
 
     // ─────────────────────────────────────────────────────────────

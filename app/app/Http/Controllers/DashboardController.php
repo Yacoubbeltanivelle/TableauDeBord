@@ -26,7 +26,12 @@ class DashboardController extends Controller
             ->where('is_today', true)
             ->with('project:id,name,color')
             ->orderBy('order')
-            ->orderByRaw("FIELD(priority, 'URGENT', 'HIGH', 'MEDIUM', 'LOW')")
+            ->orderByRaw("CASE priority 
+                WHEN 'URGENT' THEN 1 
+                WHEN 'HIGH' THEN 2 
+                WHEN 'MEDIUM' THEN 3 
+                WHEN 'LOW' THEN 4 
+                ELSE 5 END")
             ->get()
             ->map(fn($task) => [
                 'id' => $task->id,
@@ -135,9 +140,16 @@ class DashboardController extends Controller
             'DONE' => $tasks->where('status', 'DONE')->values(),
         ];
 
+        // Fetch projects for task creation dropdown
+        $projects = Project::where('user_id', $user->id)
+            ->whereIn('category', ['PROJECT', 'AREA'])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('TasksBoard', [
             'columns' => $columns,
             'wipLimit' => 3, // Max tasks in IN_PROGRESS
+            'projects' => $projects,
         ]);
     }
 
@@ -152,7 +164,12 @@ class DashboardController extends Controller
             ->withCount(['tasks', 'tasks as completed_tasks_count' => function ($query) {
                 $query->where('status', 'DONE');
             }])
-            ->orderByRaw("FIELD(category, 'PROJECT', 'AREA', 'RESOURCE', 'ARCHIVE')")
+            ->orderByRaw("CASE category 
+                WHEN 'PROJECT' THEN 1 
+                WHEN 'AREA' THEN 2 
+                WHEN 'RESOURCE' THEN 3 
+                WHEN 'ARCHIVE' THEN 4 
+                ELSE 5 END")
             ->orderBy('name')
             ->get()
             ->map(fn($project) => [
@@ -200,8 +217,15 @@ class DashboardController extends Controller
                 'updated_at' => $note->updated_at->diffForHumans(),
             ]);
 
+        // Fetch projects for note linking
+        $projects = Project::where('user_id', $user->id)
+            ->whereIn('category', ['PROJECT', 'AREA', 'RESOURCE'])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('Notes', [
             'notes' => $notes,
+            'projects' => $projects,
         ]);
     }
 

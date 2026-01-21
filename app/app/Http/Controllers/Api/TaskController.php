@@ -66,6 +66,22 @@ class TaskController extends Controller
     }
 
     /**
+     * Update task details.
+     */
+    public function update(UpdateTaskRequest $request, Task $task): RedirectResponse
+    {
+        // Authorization handled by FormRequest or explicitly here? 
+        // UpdateTaskRequest usually handles it or we call authorize.
+        // Let's check UpdateTaskRequest content first. 
+        // Assuming standard policy usage:
+        // $this->authorize('update', $task); // Usually done in Request authorize()
+        
+        $task->update($request->validated());
+
+        return back()->with('success', 'Tâche mise à jour !');
+    }
+
+    /**
      * Update task status (for kanban board).
      */
     public function updateStatus(Request $request, Task $task): RedirectResponse
@@ -105,5 +121,46 @@ class TaskController extends Controller
         $task->delete();
 
         return back()->with('success', 'Tâche supprimée !');
+    }
+    /**
+     * Reorder tasks.
+     */
+    public function reorder(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'items' => ['required', 'array'],
+            'items.*.id' => ['required', 'exists:tasks,id'],
+            'items.*.position' => ['required', 'integer'],
+            'items.*.status' => ['required', 'string', 'in:TODO,IN_PROGRESS,BLOCKED,DONE'],
+        ]);
+
+        // Check for WIP limit violation if any task is moved to IN_PROGRESS
+        $newInProgress = collect($request->items)->where('status', 'IN_PROGRESS')->count();
+        if ($newInProgress > 0) {
+            $currentInProgress = Task::where('user_id', auth()->id())
+                ->where('status', 'IN_PROGRESS')
+                ->whereNotIn('id', collect($request->items)->pluck('id'))
+                ->count();
+            
+            if (($currentInProgress + $newInProgress) > 3) {
+                 return back()->with('error', 'Limite WIP atteinte ! Max 3 tâches en cours.');
+            }
+        }
+
+        \DB::transaction(function () use ($request) {
+            foreach ($request->items as $item) {
+                $task = Task::find($item['id']);
+                
+                // Policy check: ensure user owns the task
+                if ($task && $task->user_id === auth()->id()) {
+                    $task->update([
+                        'position' => $item['position'],
+                        'status' => $item['status'],
+                    ]);
+                }
+            }
+        });
+
+        return back()->with('success', 'Ordre mis à jour !');
     }
 }

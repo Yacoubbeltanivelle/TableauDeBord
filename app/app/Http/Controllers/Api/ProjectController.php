@@ -28,6 +28,18 @@ class ProjectController extends Controller
     }
 
     /**
+     * Update project details.
+     */
+    public function update(StoreProjectRequest $request, Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $project->update($request->validated());
+
+        return back()->with('success', 'Projet mis à jour !');
+    }
+
+    /**
      * Delete project.
      */
     public function destroy(Project $project): RedirectResponse

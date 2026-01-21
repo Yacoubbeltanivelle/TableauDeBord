@@ -40,14 +40,18 @@ Route::middleware('auth')->group(function () {
     // API Routes for CRUD operations
     Route::prefix('api')->group(function () {
         // Tasks
+        Route::patch('/tasks/reorder', [\App\Http\Controllers\Api\TaskController::class, 'reorder'])->name('api.tasks.reorder');
         Route::post('/tasks', [\App\Http\Controllers\Api\TaskController::class, 'store'])->name('api.tasks.store');
+        Route::patch('/tasks/{task}', [\App\Http\Controllers\Api\TaskController::class, 'update'])->name('api.tasks.update');
         Route::patch('/tasks/{task}/toggle', [\App\Http\Controllers\Api\TaskController::class, 'toggle'])->name('api.tasks.toggle');
         Route::patch('/tasks/{task}/today', [\App\Http\Controllers\Api\TaskController::class, 'moveToToday'])->name('api.tasks.today');
         Route::patch('/tasks/{task}/status', [\App\Http\Controllers\Api\TaskController::class, 'updateStatus'])->name('api.tasks.status');
         Route::delete('/tasks/{task}', [\App\Http\Controllers\Api\TaskController::class, 'destroy'])->name('api.tasks.destroy');
 
         // Projects
+        // Projects
         Route::post('/projects', [\App\Http\Controllers\Api\ProjectController::class, 'store'])->name('api.projects.store');
+        Route::patch('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'update'])->name('api.projects.update');
         Route::delete('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'destroy'])->name('api.projects.destroy');
 
         // Notes
@@ -57,6 +61,7 @@ Route::middleware('auth')->group(function () {
 
         // Events
         Route::post('/events', [\App\Http\Controllers\Api\EventController::class, 'store'])->name('api.events.store');
+        Route::patch('/events/{event}', [\App\Http\Controllers\Api\EventController::class, 'update'])->name('api.events.update');
         Route::delete('/events/{event}', [\App\Http\Controllers\Api\EventController::class, 'destroy'])->name('api.events.destroy');
     });
 });
