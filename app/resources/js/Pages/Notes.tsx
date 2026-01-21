@@ -2,8 +2,16 @@ import { Head, router } from "@inertiajs/react";
 import AppShell from "@/Layouts/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
-import { FileText, Plus, Pin, Search, FolderKanban } from "lucide-react";
+import {
+    FileText,
+    Plus,
+    Pin,
+    Search,
+    FolderKanban,
+    Pencil,
+} from "lucide-react";
 import { useState } from "react";
+import NoteModal from "@/Components/Modals/NoteModal";
 
 interface Note {
     id: string;
@@ -18,14 +26,32 @@ interface Note {
     updated_at: string;
 }
 
-interface NotesProps {
-    notes: Note[];
+interface Project {
+    id: string;
+    name: string;
 }
 
-export default function Notes({ notes }: NotesProps) {
+interface NotesProps {
+    notes: Note[];
+    projects: Project[];
+}
+
+export default function Notes({ notes, projects }: NotesProps) {
     const [selectedNote, setSelectedNote] = useState<Note | null>(
         notes[0] || null,
     );
+    const [showModal, setShowModal] = useState(false);
+    const [editingNote, setEditingNote] = useState<Note | null>(null);
+
+    const handleCreate = () => {
+        setEditingNote(null);
+        setShowModal(true);
+    };
+
+    const handleEdit = (note: Note) => {
+        setEditingNote(note);
+        setShowModal(true);
+    };
     const [searchQuery, setSearchQuery] = useState("");
 
     const filteredNotes = notes.filter(
@@ -56,7 +82,7 @@ export default function Notes({ notes }: NotesProps) {
                                 className="w-full pl-9 pr-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                         </div>
-                        <Button size="icon">
+                        <Button size="icon" onClick={handleCreate}>
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
@@ -123,9 +149,17 @@ export default function Notes({ notes }: NotesProps) {
                                             </p>
                                         )}
                                     </div>
-                                    <span className="text-xs text-muted-foreground">
+                                    <span className="text-xs text-muted-foreground mr-2">
                                         {selectedNote.updated_at}
                                     </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => handleEdit(selectedNote)}
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="flex-1 overflow-y-auto p-6">
@@ -146,6 +180,13 @@ export default function Notes({ notes }: NotesProps) {
                     )}
                 </Card>
             </div>
+
+            <NoteModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                note={editingNote}
+                projects={projects}
+            />
         </AppShell>
     );
 }
@@ -162,7 +203,15 @@ function NoteItem({
     return (
         <div
             onClick={onClick}
-            className={`p-3 rounded-lg cursor-pointer transition-colors ${
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onClick();
+                }
+            }}
+            className={`p-3 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 selected
                     ? "bg-primary/10 border border-primary/20"
                     : "hover:bg-accent border border-transparent"

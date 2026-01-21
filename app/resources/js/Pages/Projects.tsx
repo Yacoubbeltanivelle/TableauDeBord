@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
 import { FolderKanban, Plus, Grid3X3, List, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import ProjectModal from "@/Components/Modals/ProjectModal";
 
 interface Project {
     id: string;
@@ -33,12 +34,24 @@ const categoryColors = {
     PROJECT: "bg-blue-500",
     AREA: "bg-green-500",
     RESOURCE: "bg-purple-500",
-    ARCHIVE: "bg-gray-400",
+    ARCHIVE: "bg-muted",
 };
 
 export default function Projects({ projects }: ProjectsProps) {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [filter, setFilter] = useState<string>("all");
+    const [showModal, setShowModal] = useState(false);
+    const [editingProject, setEditingProject] = useState<Project | null>(null);
+
+    const handleCreate = () => {
+        setEditingProject(null);
+        setShowModal(true);
+    };
+
+    const handleEdit = (project: Project) => {
+        setEditingProject(project);
+        setShowModal(true);
+    };
 
     const filteredProjects =
         filter === "all"
@@ -98,7 +111,7 @@ export default function Projects({ projects }: ProjectsProps) {
                         >
                             <List className="h-4 w-4" />
                         </Button>
-                        <Button className="gap-2">
+                        <Button className="gap-2" onClick={handleCreate}>
                             <Plus className="h-4 w-4" />
                             Nouveau projet
                         </Button>
@@ -133,7 +146,19 @@ export default function Projects({ projects }: ProjectsProps) {
                                 {categoryProjects.map((project) => (
                                     <Card
                                         key={project.id}
-                                        className="hover:shadow-md transition-shadow cursor-pointer group"
+                                        className="hover:shadow-md transition-shadow cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        onClick={() => handleEdit(project)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                e.key === "Enter" ||
+                                                e.key === " "
+                                            ) {
+                                                e.preventDefault();
+                                                handleEdit(project);
+                                            }
+                                        }}
                                         style={{
                                             borderLeftColor: project.color,
                                             borderLeftWidth: "4px",
@@ -197,6 +222,16 @@ export default function Projects({ projects }: ProjectsProps) {
                     </div>
                 )}
             </div>
+
+            <ProjectModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                project={
+                    editingProject
+                        ? { ...editingProject, icon: editingProject.icon || "" }
+                        : null
+                }
+            />
         </AppShell>
     );
 }

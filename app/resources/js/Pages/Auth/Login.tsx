@@ -35,8 +35,8 @@ export default function Login({
 
             {/* Status message (e.g., password reset success) */}
             {status && (
-                <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
-                    <p className="text-[13px] text-emerald-600 font-medium">
+                <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                    <p className="text-[13px] text-emerald-600 dark:text-emerald-400 font-medium">
                         {status}
                     </p>
                 </div>
@@ -44,8 +44,8 @@ export default function Login({
 
             {/* Global error message */}
             {Object.keys(errors).length > 0 && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl">
-                    <p className="text-[13px] text-red-600 font-medium">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl">
+                    <p className="text-[13px] text-destructive font-medium">
                         Email ou mot de passe incorrect.
                     </p>
                 </div>
@@ -56,7 +56,7 @@ export default function Login({
                 <div>
                     <label
                         htmlFor="email"
-                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                        className="block text-[13px] font-medium text-foreground mb-1.5"
                     >
                         Adresse email
                     </label>
@@ -66,10 +66,10 @@ export default function Login({
                         value={data.email}
                         onChange={(e) => setData("email", e.target.value)}
                         className={`
-                            w-full px-4 py-3 text-[15px] rounded-xl border bg-gray-50/50
-                            focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                            w-full px-4 py-3 text-[15px] rounded-xl border bg-background
+                            focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring
                             transition-all
-                            ${errors.email ? "border-red-300" : "border-gray-200"}
+                            ${errors.email ? "border-destructive" : "border-input"}
                         `}
                         placeholder="jean@exemple.com"
                         autoComplete="email"
@@ -83,14 +83,14 @@ export default function Login({
                     <div className="flex items-center justify-between mb-1.5">
                         <label
                             htmlFor="password"
-                            className="block text-[13px] font-medium text-gray-700"
+                            className="block text-[13px] font-medium text-foreground"
                         >
                             Mot de passe
                         </label>
                         {canResetPassword && (
                             <Link
                                 href={route("password.request")}
-                                className="text-[12px] text-indigo-600 hover:underline"
+                                className="text-[12px] text-primary hover:underline"
                             >
                                 Mot de passe oublié ?
                             </Link>
@@ -105,10 +105,10 @@ export default function Login({
                                 setData("password", e.target.value)
                             }
                             className={`
-                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-gray-50/50
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-background
+                                focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring
                                 transition-all
-                                ${errors.password ? "border-red-300" : "border-gray-200"}
+                                ${errors.password ? "border-destructive" : "border-input"}
                             `}
                             placeholder="••••••••••••"
                             autoComplete="current-password"
@@ -137,9 +137,9 @@ export default function Login({
                             onChange={(e) =>
                                 setData("remember", e.target.checked)
                             }
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            className="w-4 h-4 rounded border-input text-primary focus:ring-ring"
                         />
-                        <span className="text-[13px] text-gray-600">
+                        <span className="text-[13px] text-muted-foreground">
                             Se souvenir de moi
                         </span>
                     </label>
@@ -155,8 +155,8 @@ export default function Login({
                         transition-all duration-200
                         ${
                             !processing
-                                ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/10"
-                                : "bg-gray-400 text-white cursor-not-allowed"
+                                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10"
+                                : "bg-muted text-muted-foreground cursor-not-allowed"
                         }
                     `}
                 >
@@ -171,11 +171,11 @@ export default function Login({
                 </button>
 
                 {/* Register link */}
-                <p className="text-center text-[13px] text-gray-500">
+                <p className="text-center text-[13px] text-muted-foreground">
                     Pas encore de compte ?{" "}
                     <Link
                         href="/register"
-                        className="text-indigo-600 font-medium hover:underline"
+                        className="text-primary font-medium hover:underline"
                     >
                         Créer un compte
                     </Link>

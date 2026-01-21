@@ -62,8 +62,8 @@ export default function Register() {
 
             {/* Global error message */}
             {Object.keys(errors).length > 0 && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl">
-                    <p className="text-[13px] text-red-600 font-medium">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl">
+                    <p className="text-[13px] text-destructive font-medium">
                         Veuillez corriger les erreurs ci-dessous.
                     </p>
                 </div>
@@ -86,7 +86,7 @@ export default function Register() {
                 <div>
                     <label
                         htmlFor="name"
-                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                        className="block text-[13px] font-medium text-foreground mb-1.5"
                     >
                         Nom complet
                     </label>
@@ -96,10 +96,10 @@ export default function Register() {
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
                         className={`
-                            w-full px-4 py-3 text-[15px] rounded-xl border bg-gray-50/50
-                            focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                            w-full px-4 py-3 text-[15px] rounded-xl border bg-background
+                            focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring
                             transition-all
-                            ${errors.name ? "border-red-300" : "border-gray-200"}
+                            ${errors.name ? "border-destructive" : "border-input"}
                         `}
                         placeholder="Jean Dupont"
                         autoComplete="name"
@@ -107,7 +107,7 @@ export default function Register() {
                         required
                     />
                     {errors.name && (
-                        <p className="mt-1.5 text-[12px] text-red-600">
+                        <p className="mt-1.5 text-[12px] text-destructive">
                             {errors.name}
                         </p>
                     )}
@@ -117,7 +117,7 @@ export default function Register() {
                 <div>
                     <label
                         htmlFor="email"
-                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                        className="block text-[13px] font-medium text-foreground mb-1.5"
                     >
                         Adresse email
                     </label>
@@ -127,10 +127,10 @@ export default function Register() {
                         value={data.email}
                         onChange={(e) => setData("email", e.target.value)}
                         className={`
-                            w-full px-4 py-3 text-[15px] rounded-xl border bg-gray-50/50
-                            focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                            w-full px-4 py-3 text-[15px] rounded-xl border bg-background
+                            focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring
                             transition-all
-                            ${errors.email ? "border-red-300" : "border-gray-200"}
+                            ${errors.email ? "border-destructive" : "border-input"}
                         `}
                         placeholder="jean@exemple.com"
                         autoComplete="email"
@@ -147,7 +147,7 @@ export default function Register() {
                 <div>
                     <label
                         htmlFor="password"
-                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                        className="block text-[13px] font-medium text-foreground mb-1.5"
                     >
                         Mot de passe
                     </label>
@@ -160,10 +160,10 @@ export default function Register() {
                                 setData("password", e.target.value)
                             }
                             className={`
-                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-gray-50/50
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-background
+                                focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring
                                 transition-all
-                                ${errors.password ? "border-red-300" : "border-gray-200"}
+                                ${errors.password ? "border-destructive" : "border-input"}
                             `}
                             placeholder="••••••••••••"
                             autoComplete="new-password"
@@ -193,7 +193,7 @@ export default function Register() {
                 <div>
                     <label
                         htmlFor="password_confirmation"
-                        className="block text-[13px] font-medium text-gray-700 mb-1.5"
+                        className="block text-[13px] font-medium text-foreground mb-1.5"
                     >
                         Confirmer le mot de passe
                     </label>
@@ -206,11 +206,11 @@ export default function Register() {
                                 setData("password_confirmation", e.target.value)
                             }
                             className={`
-                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-gray-50/50
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500
+                                w-full px-4 py-3 pr-12 text-[15px] rounded-xl border bg-background
+                                focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring
                                 transition-all
-                                ${data.password_confirmation && !passwordsMatch ? "border-red-300" : "border-gray-200"}
-                                ${passwordsMatch ? "border-emerald-300" : ""}
+                                ${data.password_confirmation && !passwordsMatch ? "border-destructive" : "border-input"}
+                                ${passwordsMatch ? "border-emerald-500" : ""}
                             `}
                             placeholder="••••••••••••"
                             autoComplete="new-password"
@@ -250,20 +250,20 @@ export default function Register() {
                             type="checkbox"
                             checked={data.terms}
                             onChange={(e) => setData("terms", e.target.checked)}
-                            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            className="mt-0.5 w-4 h-4 rounded border-input text-primary focus:ring-ring"
                         />
-                        <span className="text-[13px] text-gray-600 leading-relaxed">
+                        <span className="text-[13px] text-muted-foreground leading-relaxed">
                             J'accepte les{" "}
                             <Link
                                 href="/terms"
-                                className="text-indigo-600 hover:underline"
+                                className="text-primary hover:underline"
                             >
                                 Conditions d'utilisation
                             </Link>{" "}
                             et la{" "}
                             <Link
                                 href="/privacy"
-                                className="text-indigo-600 hover:underline"
+                                className="text-primary hover:underline"
                             >
                                 Politique de confidentialité
                             </Link>
@@ -281,8 +281,8 @@ export default function Register() {
                         transition-all duration-200
                         ${
                             formValid && !processing
-                                ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/10"
-                                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10"
+                                : "bg-muted text-muted-foreground cursor-not-allowed"
                         }
                     `}
                 >
@@ -297,11 +297,11 @@ export default function Register() {
                 </button>
 
                 {/* Login link */}
-                <p className="text-center text-[13px] text-gray-500">
+                <p className="text-center text-[13px] text-muted-foreground">
                     Déjà un compte ?{" "}
                     <Link
                         href="/login"
-                        className="text-indigo-600 font-medium hover:underline"
+                        className="text-primary font-medium hover:underline"
                     >
                         Se connecter
                     </Link>

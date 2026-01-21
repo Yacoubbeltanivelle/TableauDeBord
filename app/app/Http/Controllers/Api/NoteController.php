@@ -15,13 +15,10 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request): RedirectResponse
     {
-        Note::create([
-            'user_id' => auth()->id(),
-            'title' => $request->title,
-            'content' => $request->content ?? '',
-            'project_id' => $request->project_id,
-            'is_pinned' => $request->is_pinned ?? false,
-        ]);
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
+        
+        Note::create($data);
 
         return back()->with('success', 'Note créée avec succès !');
     }
@@ -36,10 +33,11 @@ class NoteController extends Controller
         $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
+            'project_id' => ['nullable', 'uuid', 'exists:projects,id'],
             'is_pinned' => ['nullable', 'boolean'],
         ]);
 
-        $note->update($request->only(['title', 'content', 'is_pinned']));
+        $note->update($request->only(['title', 'content', 'project_id', 'is_pinned']));
 
         return back()->with('success', 'Note mise à jour !');
     }

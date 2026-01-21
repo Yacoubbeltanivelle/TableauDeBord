@@ -147,6 +147,7 @@ interface TopbarProps {
     rightPanelOpen: boolean;
     onToggleRightPanel: () => void;
     title?: string;
+    actions?: React.ReactNode;
 }
 
 export function Topbar({
@@ -154,6 +155,7 @@ export function Topbar({
     rightPanelOpen,
     onToggleRightPanel,
     title,
+    actions,
 }: TopbarProps) {
     const user = usePage().props.auth.user;
     const [isDark, setIsDark] = useState(false);
@@ -188,6 +190,11 @@ export function Topbar({
                     <h1 className="text-xl font-semibold text-foreground">
                         {title}
                     </h1>
+                )}
+                {actions && (
+                    <div className="ml-4 flex items-center gap-2">
+                        {actions}
+                    </div>
                 )}
             </div>
 
@@ -275,9 +282,10 @@ export function RightPanel({ open }: RightPanelProps) {
 interface AppShellProps {
     children: React.ReactNode;
     title?: string;
+    actions?: React.ReactNode;
 }
 
-export default function AppShell({ children, title }: AppShellProps) {
+export default function AppShell({ children, title, actions }: AppShellProps) {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
@@ -291,7 +299,10 @@ export default function AppShell({ children, title }: AppShellProps) {
                 sidebarCollapsed={sidebarCollapsed}
                 rightPanelOpen={rightPanelOpen}
                 onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
+                rightPanelOpen={rightPanelOpen}
+                onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
                 title={title}
+                actions={actions}
             />
             <RightPanel open={rightPanelOpen} />
 

@@ -9,8 +9,10 @@ import {
     Clock,
     ChevronLeft,
     ChevronRight,
+    Pencil,
 } from "lucide-react";
 import { useState, useMemo } from "react";
+import EventModal from "@/Components/Modals/EventModal";
 
 interface Event {
     id: string;
@@ -30,6 +32,18 @@ interface CalendarProps {
 
 export default function Calendar({ events, currentMonth }: CalendarProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+
+    const handleCreate = () => {
+        setEditingEvent(null);
+        setShowModal(true);
+    };
+
+    const handleEdit = (event: Event) => {
+        setEditingEvent(event);
+        setShowModal(true);
+    };
 
     // Get current month info
     const [year, month] = currentMonth.split("-").map(Number);
@@ -128,7 +142,18 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                                     <div
                                         key={idx}
                                         onClick={() => setSelectedDate(dateStr)}
-                                        className={`h-20 p-1 rounded-lg border cursor-pointer transition-colors ${
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                e.key === "Enter" ||
+                                                e.key === " "
+                                            ) {
+                                                e.preventDefault();
+                                                setSelectedDate(dateStr);
+                                            }
+                                        }}
+                                        className={`h-20 p-1 rounded-lg border cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                             isSelected
                                                 ? "border-primary bg-primary/5"
                                                 : isToday
@@ -178,7 +203,11 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                                   )
                                 : "Sélectionnez une date"}
                         </CardTitle>
-                        <Button size="icon" variant="outline">
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={handleCreate}
+                        >
                             <Plus className="h-4 w-4" />
                         </Button>
                     </CardHeader>
@@ -194,9 +223,17 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                                     key={event.id}
                                     className="p-3 rounded-lg border hover:bg-accent/50 transition-colors"
                                 >
-                                    <h4 className="font-medium text-sm">
-                                        {event.title}
-                                    </h4>
+                                    <div className="flex justify-between items-start">
+                                        <h4 className="font-medium text-sm">
+                                            {event.title}
+                                        </h4>
+                                        <button
+                                            onClick={() => handleEdit(event)}
+                                            className="text-muted-foreground hover:text-foreground rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        >
+                                            <Pencil className="h-3 w-3" />
+                                        </button>
+                                    </div>
                                     {event.description && (
                                         <p className="text-xs text-muted-foreground mt-1">
                                             {event.description}
@@ -232,6 +269,13 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                     </CardContent>
                 </Card>
             </div>
+
+            <EventModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                event={editingEvent}
+                selectedDate={selectedDate ? new Date(selectedDate) : null}
+            />
         </AppShell>
     );
 }

@@ -111,7 +111,7 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                     setQuickCapture(e.target.value)
                                 }
                                 placeholder="Qu'avez-vous en tête ? Appuyez sur Entrée..."
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                className="flex-1 px-4 py-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
                             />
                             <Button
                                 type="submit"
@@ -154,10 +154,10 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                 {inboxItems.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="group flex items-center gap-3 rounded-xl border border-dashed border-gray-300 p-4 bg-gray-50/50 hover:bg-white hover:border-gray-400 transition-all"
+                                        className="group flex items-center gap-3 rounded-xl border border-dashed border-border p-4 bg-muted/30 hover:bg-card hover:border-primary/30 transition-all"
                                     >
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="text-sm font-medium text-foreground">
                                                 {item.content}
                                             </p>
                                             <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
@@ -190,7 +190,7 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                                                 null,
                                                             )
                                                         }
-                                                        className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+                                                        className="px-2 py-1 text-xs bg-secondary text-secondary-foreground rounded hover:bg-muted"
                                                     >
                                                         Non
                                                     </button>
@@ -206,7 +206,7 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                                         )
                                                     }
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                                                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-red-500" />
                                                 </Button>
                                             )}
                                         </div>
@@ -217,10 +217,10 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                 {inboxTasks.map((task) => (
                                     <div
                                         key={task.id}
-                                        className="group flex items-center gap-3 rounded-xl border p-4 hover:shadow-sm hover:bg-white transition-all"
+                                        className="group flex items-center gap-3 rounded-xl border p-4 hover:shadow-sm hover:bg-accent transition-all"
                                     >
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-gray-900">
+                                            <p className="font-medium text-foreground">
                                                 {task.title}
                                             </p>
                                             <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
