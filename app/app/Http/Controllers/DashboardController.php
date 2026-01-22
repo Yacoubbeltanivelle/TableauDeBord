@@ -16,14 +16,16 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     /**
-     * Today page - shows tasks marked for today
+     * Today page - shows tasks marked for today AND in progress
      */
     public function today(): Response
     {
         $user = auth()->user();
         
+        // Only show IN_PROGRESS tasks for "Today" focus
         $todayTasks = Task::where('user_id', $user->id)
             ->where('is_today', true)
+            ->where('status', 'IN_PROGRESS')
             ->with('project:id,name,color')
             ->orderBy('order')
             ->orderByRaw("CASE priority 
@@ -52,6 +54,17 @@ class DashboardController extends Controller
         $totalCount = $todayTasks->count();
         $progressPercent = $totalCount > 0 ? round(($completedCount / $totalCount) * 100) : 0;
 
+        // B1: Days remaining until end of year
+        $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31);
+        $daysRemaining = now()->diffInDays($endOfYear);
+
+        // B2: Tasks completed since January 1st of current year
+        $startOfYear = \Carbon\Carbon::createFromDate(now()->year, 1, 1);
+        $yearlyCompletedCount = Task::where('user_id', $user->id)
+            ->whereNotNull('completed_at')
+            ->where('completed_at', '>=', $startOfYear)
+            ->count();
+
         // Fetch projects for task creation dropdown
         $projects = Project::where('user_id', $user->id)
             ->whereIn('category', ['PROJECT', 'AREA'])
@@ -65,6 +78,9 @@ class DashboardController extends Controller
                 'total' => $totalCount,
                 'progress' => $progressPercent,
             ],
+            'daysRemaining' => $daysRemaining,
+            'currentYear' => now()->year,
+            'yearlyCompletedCount' => $yearlyCompletedCount,
             'projects' => $projects,
         ]);
     }

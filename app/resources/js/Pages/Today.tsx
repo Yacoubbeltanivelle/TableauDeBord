@@ -15,8 +15,11 @@ import {
     Eye,
     EyeOff,
     Trash2,
+    Target,
+    Trophy,
+    Quote,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Task {
     id: string;
@@ -45,13 +48,41 @@ interface TodayProps {
         total: number;
         progress: number;
     };
+    daysRemaining: number;
+    currentYear: number;
+    yearlyCompletedCount: number;
     projects?: Project[];
 }
 
-export default function Today({ tasks, stats, projects = [] }: TodayProps) {
+export default function Today({
+    tasks,
+    stats,
+    daysRemaining,
+    currentYear,
+    yearlyCompletedCount,
+    projects = [],
+}: TodayProps) {
     const [showAddModal, setShowAddModal] = useState(false);
     const [hideCompleted, setHideCompleted] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [quote, setQuote] = useState<{
+        text: string;
+        author: string | null;
+    } | null>(null);
+    const [quoteLoading, setQuoteLoading] = useState(true);
+
+    // Fetch motivational quote on mount
+    useEffect(() => {
+        fetch("/api/motivation")
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.error) {
+                    setQuote({ text: data.text, author: data.author });
+                }
+                setQuoteLoading(false);
+            })
+            .catch(() => setQuoteLoading(false));
+    }, []);
 
     const { data, setData, post, processing, reset, errors } = useForm({
         title: "",
@@ -132,6 +163,77 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* 3 Motivational Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* B1: Days Remaining */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Fin d'année
+                            </CardTitle>
+                            <Target className="h-5 w-5 text-blue-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-foreground">
+                                {daysRemaining} jours
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                avant la fin de {currentYear}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    {/* B2: Yearly Completed */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Cette année
+                            </CardTitle>
+                            <Trophy className="h-5 w-5 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-foreground">
+                                {yearlyCompletedCount} tâches
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                terminées depuis le 1er janvier
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    {/* B3: Motivation Quote */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Motivation
+                            </CardTitle>
+                            <Quote className="h-5 w-5 text-purple-500" />
+                        </CardHeader>
+                        <CardContent>
+                            {quoteLoading ? (
+                                <p className="text-sm text-muted-foreground italic">
+                                    Chargement...
+                                </p>
+                            ) : quote ? (
+                                <>
+                                    <p className="text-sm text-foreground italic line-clamp-3">
+                                        "{quote.text}"
+                                    </p>
+                                    {quote.author && (
+                                        <p className="text-xs text-muted-foreground mt-2">
+                                            — {quote.author}
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="text-sm text-muted-foreground italic">
+                                    Citation indisponible
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Tasks List */}
                 <Card>
@@ -304,7 +406,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
                         onClick={() => setShowAddModal(false)}
                     />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <div className="relative bg-card text-foreground rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 border border-border">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold">
                                 Nouvelle tâche
@@ -434,7 +536,7 @@ export default function Today({ tasks, stats, projects = [] }: TodayProps) {
                         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
                         onClick={() => setEditingTask(null)}
                     />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <div className="relative bg-card text-foreground rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 border border-border">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-xl font-semibold">
                                 Détails de la tâche

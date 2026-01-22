@@ -31,29 +31,34 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { name: "Today", href: "/today", icon: Sun, routeName: "today" },
-    { name: "Inbox", href: "/inbox", icon: Inbox, routeName: "inbox" },
+    { name: "Aujourd'hui", href: "/today", icon: Sun, routeName: "today" },
     {
-        name: "Tasks Board",
+        name: "Boîte de réception",
+        href: "/inbox",
+        icon: Inbox,
+        routeName: "inbox",
+    },
+    {
+        name: "Tableau des tâches",
         href: "/tasks",
         icon: LayoutDashboard,
         routeName: "tasks",
     },
     {
-        name: "Projects",
+        name: "Projets",
         href: "/projects",
         icon: FolderKanban,
         routeName: "projects",
     },
     { name: "Notes", href: "/notes", icon: NotebookPen, routeName: "notes" },
     {
-        name: "Calendar",
+        name: "Calendrier",
         href: "/calendar",
         icon: CalendarDays,
         routeName: "calendar",
     },
     {
-        name: "Business",
+        name: "Activité",
         href: "/business",
         icon: TrendingUp,
         routeName: "business",
@@ -253,24 +258,24 @@ export function RightPanel({ open }: RightPanelProps) {
     return (
         <aside className="fixed right-0 top-0 z-40 h-screen w-80 border-l border-border bg-card">
             <div className="flex h-16 items-center border-b border-border px-4">
-                <h2 className="font-semibold text-foreground">Quick View</h2>
+                <h2 className="font-semibold text-foreground">Aperçu rapide</h2>
             </div>
             <ScrollArea className="h-[calc(100vh-4rem)] p-4">
                 <div className="space-y-4">
                     <div className="rounded-lg border border-border bg-muted/50 p-4">
                         <h3 className="mb-2 text-sm font-medium text-foreground">
-                            Today's Focus
+                            Focus du jour
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            No tasks yet. Add your first task!
+                            Aucune tâche. Ajoutez votre première !
                         </p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/50 p-4">
                         <h3 className="mb-2 text-sm font-medium text-foreground">
-                            Upcoming
+                            À venir
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            Nothing scheduled this week.
+                            Rien de prévu cette semaine.
                         </p>
                     </div>
                 </div>
@@ -297,8 +302,6 @@ export default function AppShell({ children, title, actions }: AppShellProps) {
             />
             <Topbar
                 sidebarCollapsed={sidebarCollapsed}
-                rightPanelOpen={rightPanelOpen}
-                onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
                 rightPanelOpen={rightPanelOpen}
                 onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
                 title={title}

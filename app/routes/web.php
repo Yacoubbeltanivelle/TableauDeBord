@@ -63,6 +63,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/events', [\App\Http\Controllers\Api\EventController::class, 'store'])->name('api.events.store');
         Route::patch('/events/{event}', [\App\Http\Controllers\Api\EventController::class, 'update'])->name('api.events.update');
         Route::delete('/events/{event}', [\App\Http\Controllers\Api\EventController::class, 'destroy'])->name('api.events.destroy');
+
+        // Motivation (dynamic French quotes)
+        Route::get('/motivation', [\App\Http\Controllers\Api\MotivationController::class, 'random'])->name('api.motivation');
     });
 });
 

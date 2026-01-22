@@ -56,8 +56,9 @@ class DashboardTest extends TestCase
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
-        $task1 = Task::factory()->create(['user_id' => $user1->id, 'is_today' => true]);
-        $task2 = Task::factory()->create(['user_id' => $user2->id, 'is_today' => true]);
+        // Today page now shows only IN_PROGRESS tasks
+        $task1 = Task::factory()->create(['user_id' => $user1->id, 'is_today' => true, 'status' => 'IN_PROGRESS']);
+        $task2 = Task::factory()->create(['user_id' => $user2->id, 'is_today' => true, 'status' => 'IN_PROGRESS']);
 
         $response = $this->actingAs($user1)->get('/today');
 
