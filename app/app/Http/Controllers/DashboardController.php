@@ -22,18 +22,18 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Only show IN_PROGRESS tasks for "Today" focus
-        $todayTasks = Task::where('user_id', $user->id)
-            ->where('is_today', true)
+        // Focus: Only IN_PROGRESS tasks for "Today" focus
+        $focusTasks = Task::where('user_id', $user->id)
             ->where('status', 'IN_PROGRESS')
             ->with('project:id,name,color')
-            ->orderBy('order')
             ->orderByRaw("CASE priority 
                 WHEN 'URGENT' THEN 1 
                 WHEN 'HIGH' THEN 2 
                 WHEN 'MEDIUM' THEN 3 
                 WHEN 'LOW' THEN 4 
                 ELSE 5 END")
+            ->orderBy('due_date')
+            ->orderBy('updated_at', 'desc')
             ->get()
             ->map(fn($task) => [
                 'id' => $task->id,
@@ -41,7 +41,7 @@ class DashboardController extends Controller
                 'description' => $task->description,
                 'priority' => strtolower($task->priority),
                 'status' => $task->status,
-                'completed' => $task->status === 'DONE',
+                'completed' => false,
                 'due_date' => $task->due_date?->format('Y-m-d'),
                 'project' => $task->project ? [
                     'id' => $task->project->id,
@@ -50,25 +50,42 @@ class DashboardController extends Controller
                 ] : null,
             ]);
 
-        // B1: Days remaining until end of year (integer)
+        // Completed today: from task_completions journal
+        $completedToday = \App\Models\TaskCompletion::where('user_id', $user->id)
+            ->whereDate('completed_on', today())
+            ->with('task.project:id,name,color')
+            ->get()
+            ->map(fn($completion) => [
+                'id' => $completion->task->id,
+                'title' => $completion->task->title,
+                'description' => $completion->task->description,
+                'priority' => strtolower($completion->task->priority),
+                'status' => 'DONE',
+                'completed' => true,
+                'due_date' => $completion->task->due_date?->format('Y-m-d'),
+                'project' => $completion->task->project ? [
+                    'id' => $completion->task->project->id,
+                    'name' => $completion->task->project->name,
+                    'color' => $completion->task->project->color,
+                ] : null,
+            ]);
+
+        // Progress calculation: doneTodayCount / (doneTodayCount + focusCount)
+        $doneTodayCount = $completedToday->count();
+        $focusCount = $focusTasks->count();
+        $progressPercent = ($doneTodayCount + $focusCount) > 0 
+            ? (int) round(($doneTodayCount / ($doneTodayCount + $focusCount)) * 100)
+            : 0;
+
+        // Days remaining until end of year (integer)
         $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31);
         $daysRemaining = (int) now()->diffInDays($endOfYear);
 
-        // B2: Tasks completed since January 1st of current year
+        // Tasks completed since January 1st of current year (from journal)
         $startOfYear = \Carbon\Carbon::createFromDate(now()->year, 1, 1);
-        $yearlyCompletedCount = Task::where('user_id', $user->id)
-            ->whereNotNull('completed_at')
-            ->where('completed_at', '>=', $startOfYear)
+        $yearlyCompletedCount = \App\Models\TaskCompletion::where('user_id', $user->id)
+            ->where('completed_on', '>=', $startOfYear)
             ->count();
-
-        // B3: Tasks completed TODAY for progress bar
-        $tasksDoneToday = Task::where('user_id', $user->id)
-            ->whereNotNull('completed_at')
-            ->whereDate('completed_at', today())
-            ->count();
-        
-        $dailyGoal = 3;
-        $progressPercent = min(100, round(($tasksDoneToday / $dailyGoal) * 100));
 
         // Fetch projects for task creation dropdown
         $projects = Project::where('user_id', $user->id)
@@ -77,9 +94,10 @@ class DashboardController extends Controller
             ->get(['id', 'name']);
 
         return Inertia::render('Today', [
-            'tasks' => $todayTasks,
-            'tasksDoneToday' => $tasksDoneToday,
-            'dailyGoal' => $dailyGoal,
+            'focusTasks' => $focusTasks,
+            'completedToday' => $completedToday,
+            'doneTodayCount' => $doneTodayCount,
+            'focusCount' => $focusCount,
             'progressPercent' => $progressPercent,
             'daysRemaining' => $daysRemaining,
             'currentYear' => now()->year,

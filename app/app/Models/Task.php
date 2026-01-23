@@ -62,6 +62,11 @@ class Task extends Model
         return $this->hasMany(Event::class);
     }
 
+    public function completions(): HasMany
+    {
+        return $this->hasMany(TaskCompletion::class);
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Scopes
     // ─────────────────────────────────────────────────────────────

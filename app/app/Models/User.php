@@ -90,5 +90,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Kpi::class);
     }
+
+    public function taskCompletions(): HasMany
+    {
+        return $this->hasMany(TaskCompletion::class);
+    }
 }
 

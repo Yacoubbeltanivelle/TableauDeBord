@@ -56,16 +56,16 @@ class DashboardTest extends TestCase
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
-        // Today page now shows only IN_PROGRESS tasks
-        $task1 = Task::factory()->create(['user_id' => $user1->id, 'is_today' => true, 'status' => 'IN_PROGRESS']);
-        $task2 = Task::factory()->create(['user_id' => $user2->id, 'is_today' => true, 'status' => 'IN_PROGRESS']);
+        // Today page now shows only IN_PROGRESS tasks in focusTasks
+        $task1 = Task::factory()->create(['user_id' => $user1->id, 'status' => 'IN_PROGRESS']);
+        $task2 = Task::factory()->create(['user_id' => $user2->id, 'status' => 'IN_PROGRESS']);
 
         $response = $this->actingAs($user1)->get('/today');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => 
             $page->component('Today')
-                ->has('tasks', 1) // Only user1's task
+                ->has('focusTasks', 1) // Only user1's task
         );
     }
 

@@ -42,9 +42,10 @@ interface Project {
 }
 
 interface TodayProps {
-    tasks: Task[];
-    tasksDoneToday: number;
-    dailyGoal: number;
+    focusTasks: Task[];
+    completedToday: Task[];
+    doneTodayCount: number;
+    focusCount: number;
     progressPercent: number;
     daysRemaining: number;
     currentYear: number;
@@ -53,9 +54,10 @@ interface TodayProps {
 }
 
 export default function Today({
-    tasks,
-    tasksDoneToday,
-    dailyGoal,
+    focusTasks,
+    completedToday,
+    doneTodayCount,
+    focusCount,
     progressPercent,
     daysRemaining,
     currentYear,
@@ -128,11 +130,8 @@ export default function Today({
         low: "bg-secondary text-secondary-foreground border border-border",
     };
 
-    const filteredTasks = hideCompleted
-        ? tasks.filter((t) => !t.completed)
-        : tasks;
-
-    const completedCount = tasks.filter((t) => t.completed).length;
+    // No longer need these since we have separate lists
+    // filteredTasks and completedCount removed
 
     return (
         <AppShell title="Aujourd'hui">
@@ -152,8 +151,8 @@ export default function Today({
                             {progressPercent}%
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
-                            {tasksDoneToday} / {dailyGoal} tâches terminées
-                            aujourd'hui
+                            {doneTodayCount} terminées aujourd'hui •{" "}
+                            {focusCount} en cours
                         </p>
                         {/* Enhanced progress bar */}
                         <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-secondary">
@@ -236,36 +235,11 @@ export default function Today({
                     </Card>
                 </div>
 
-                {/* Tasks List */}
+                {/* Focus Tasks List */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Tâches en cours (Focus)</CardTitle>
                         <div className="flex items-center gap-2">
-                            {/* Hide completed toggle */}
-                            {completedCount > 0 && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                        setHideCompleted(!hideCompleted)
-                                    }
-                                    className="text-muted-foreground"
-                                >
-                                    {hideCompleted ? (
-                                        <>
-                                            <Eye className="h-4 w-4 mr-1" />
-                                            Afficher terminées ({completedCount}
-                                            )
-                                        </>
-                                    ) : (
-                                        <>
-                                            <EyeOff className="h-4 w-4 mr-1" />
-                                            Masquer terminées
-                                        </>
-                                    )}
-                                </Button>
-                            )}
-                            {/* Add task button */}
                             <Button
                                 size="sm"
                                 onClick={() => setShowAddModal(true)}
@@ -277,56 +251,39 @@ export default function Today({
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        {filteredTasks.length === 0 ? (
+                        {focusTasks.length === 0 ? (
                             <div className="text-center py-12 text-muted-foreground">
                                 <Sun className="h-16 w-16 mx-auto mb-4 opacity-30" />
                                 <p className="text-lg font-medium">
-                                    Aucune tâche pour aujourd'hui
+                                    Aucune tâche en cours
                                 </p>
                                 <p className="text-sm mt-1">
-                                    Cliquez sur "Nouvelle tâche" pour commencer
+                                    Toutes vos tâches sont terminées ! 🎉
                                 </p>
                             </div>
                         ) : (
-                            filteredTasks.map((task) => (
+                            focusTasks.map((task: Task) => (
                                 <div
                                     key={task.id}
-                                    className={`group flex items-center gap-3 rounded-xl border p-4 transition-all duration-200 ${
-                                        task.completed
-                                            ? "border-border bg-muted/30 opacity-60"
-                                            : "border-border bg-card hover:border-primary/30 hover:shadow-sm"
-                                    }`}
+                                    className="group flex items-center gap-3 rounded-xl border p-4 transition-all duration-200 border-border bg-card hover:border-primary/30 hover:shadow-sm"
                                 >
-                                    {/* Checkbox */}
                                     <button
                                         onClick={() => toggleTask(task.id)}
                                         className="shrink-0 focus:outline-none"
                                     >
-                                        {task.completed ? (
-                                            <CheckCircle2 className="h-6 w-6 text-green-500" />
-                                        ) : (
-                                            <Circle className="h-6 w-6 text-muted-foreground hover:text-foreground transition-colors" />
-                                        )}
+                                        <Circle className="h-6 w-6 text-muted-foreground hover:text-foreground transition-colors" />
                                     </button>
-
-                                    {/* Task content - clickable */}
                                     <div
                                         className="flex-1 min-w-0 cursor-pointer"
                                         onClick={() => setEditingTask(task)}
                                     >
-                                        <span
-                                            className={`block font-medium ${
-                                                task.completed
-                                                    ? "text-muted-foreground line-through"
-                                                    : "text-foreground"
-                                            }`}
-                                        >
+                                        <span className="block font-medium text-foreground">
                                             {task.title}
                                         </span>
                                         {task.project && (
                                             <Link
-                                                href={`/projects`}
-                                                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 mt-1"
+                                                href="/projects"
+                                                className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 mt-1"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
@@ -336,8 +293,6 @@ export default function Today({
                                             </Link>
                                         )}
                                     </div>
-
-                                    {/* Right side - meta info */}
                                     <div className="flex items-center gap-3 shrink-0">
                                         {task.due_date && (
                                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -361,43 +316,50 @@ export default function Today({
                                                     ? "Moyenne"
                                                     : "Basse"}
                                         </span>
-                                        {/* Delete button with confirmation */}
-                                        {deleteConfirmId === task.id ? (
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() =>
-                                                        deleteTask(task.id)
-                                                    }
-                                                    className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                                                >
-                                                    Oui
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        setDeleteConfirmId(null)
-                                                    }
-                                                    className="px-2 py-1 text-xs bg-secondary text-secondary-foreground rounded hover:bg-muted transition-colors"
-                                                >
-                                                    Non
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setDeleteConfirmId(task.id);
-                                                }}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
-                                            >
-                                                <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
                             ))
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Completed Today Section */}
+                {completedToday.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                Terminées aujourd'hui ({doneTodayCount})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {completedToday.map((task: Task) => (
+                                <div
+                                    key={task.id}
+                                    className="group flex items-center gap-3 rounded-xl border p-4 transition-all duration-200 border-border bg-muted/30 opacity-60"
+                                >
+                                    <button
+                                        onClick={() => toggleTask(task.id)}
+                                        className="shrink-0 focus:outline-none"
+                                    >
+                                        <CheckCircle2 className="h-6 w-6 text-green-500" />
+                                    </button>
+                                    <div className="flex-1 min-w-0">
+                                        <span className="block font-medium text-muted-foreground line-through">
+                                            {task.title}
+                                        </span>
+                                        {task.project && (
+                                            <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                                <FolderKanban className="h-3 w-3" />
+                                                {task.project.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
             </div>
 
             {/* Add Task Modal */}

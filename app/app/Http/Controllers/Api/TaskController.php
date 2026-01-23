@@ -33,21 +33,47 @@ class TaskController extends Controller
 
     /**
      * Toggle task completion status.
+     * Also manages task_completions journal for daily tracking.
      */
     public function toggle(Task $task): RedirectResponse
     {
         $this->authorize('update', $task);
 
         if ($task->status === 'DONE') {
+            // Reopen task: go back to IN_PROGRESS and soft-delete today's completion
             $task->update([
-                'status' => 'TODO',
+                'status' => 'IN_PROGRESS',
                 'completed_at' => null,
             ]);
+            
+            // Soft-delete today's completion entry if exists
+            \App\Models\TaskCompletion::where('user_id', auth()->id())
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->delete();
         } else {
+            // Complete task: mark as DONE and record completion
             $task->update([
                 'status' => 'DONE',
                 'completed_at' => now(),
             ]);
+            
+            // Upsert completion entry (restore if soft-deleted)
+            $existing = \App\Models\TaskCompletion::withTrashed()
+                ->where('user_id', auth()->id())
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->first();
+            
+            if ($existing) {
+                $existing->restore();
+            } else {
+                \App\Models\TaskCompletion::create([
+                    'user_id' => auth()->id(),
+                    'task_id' => $task->id,
+                    'completed_on' => today(),
+                ]);
+            }
         }
 
         return back()->with('success', 'Tâche mise à jour !');
