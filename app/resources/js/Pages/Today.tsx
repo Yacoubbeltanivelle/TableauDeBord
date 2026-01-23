@@ -43,11 +43,9 @@ interface Project {
 
 interface TodayProps {
     tasks: Task[];
-    stats: {
-        completed: number;
-        total: number;
-        progress: number;
-    };
+    tasksDoneToday: number;
+    dailyGoal: number;
+    progressPercent: number;
     daysRemaining: number;
     currentYear: number;
     yearlyCompletedCount: number;
@@ -56,7 +54,9 @@ interface TodayProps {
 
 export default function Today({
     tasks,
-    stats,
+    tasksDoneToday,
+    dailyGoal,
+    progressPercent,
     daysRemaining,
     currentYear,
     yearlyCompletedCount,
@@ -149,16 +149,17 @@ export default function Today({
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-primary">
-                            {stats.progress}%
+                            {progressPercent}%
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
-                            {stats.completed} sur {stats.total} tâches terminées
+                            {tasksDoneToday} / {dailyGoal} tâches terminées
+                            aujourd'hui
                         </p>
                         {/* Enhanced progress bar */}
                         <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-secondary">
                             <div
                                 className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-700 ease-out"
-                                style={{ width: `${stats.progress}%` }}
+                                style={{ width: `${progressPercent}%` }}
                             />
                         </div>
                     </CardContent>
@@ -238,7 +239,7 @@ export default function Today({
                 {/* Tasks List */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Tâches du jour</CardTitle>
+                        <CardTitle>Tâches en cours (Focus)</CardTitle>
                         <div className="flex items-center gap-2">
                             {/* Hide completed toggle */}
                             {completedCount > 0 && (

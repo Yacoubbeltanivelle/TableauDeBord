@@ -50,13 +50,9 @@ class DashboardController extends Controller
                 ] : null,
             ]);
 
-        $completedCount = $todayTasks->where('completed', true)->count();
-        $totalCount = $todayTasks->count();
-        $progressPercent = $totalCount > 0 ? round(($completedCount / $totalCount) * 100) : 0;
-
-        // B1: Days remaining until end of year
+        // B1: Days remaining until end of year (integer)
         $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31);
-        $daysRemaining = now()->diffInDays($endOfYear);
+        $daysRemaining = (int) now()->diffInDays($endOfYear);
 
         // B2: Tasks completed since January 1st of current year
         $startOfYear = \Carbon\Carbon::createFromDate(now()->year, 1, 1);
@@ -64,6 +60,15 @@ class DashboardController extends Controller
             ->whereNotNull('completed_at')
             ->where('completed_at', '>=', $startOfYear)
             ->count();
+
+        // B3: Tasks completed TODAY for progress bar
+        $tasksDoneToday = Task::where('user_id', $user->id)
+            ->whereNotNull('completed_at')
+            ->whereDate('completed_at', today())
+            ->count();
+        
+        $dailyGoal = 3;
+        $progressPercent = min(100, round(($tasksDoneToday / $dailyGoal) * 100));
 
         // Fetch projects for task creation dropdown
         $projects = Project::where('user_id', $user->id)
@@ -73,11 +78,9 @@ class DashboardController extends Controller
 
         return Inertia::render('Today', [
             'tasks' => $todayTasks,
-            'stats' => [
-                'completed' => $completedCount,
-                'total' => $totalCount,
-                'progress' => $progressPercent,
-            ],
+            'tasksDoneToday' => $tasksDoneToday,
+            'dailyGoal' => $dailyGoal,
+            'progressPercent' => $progressPercent,
             'daysRemaining' => $daysRemaining,
             'currentYear' => now()->year,
             'yearlyCompletedCount' => $yearlyCompletedCount,
