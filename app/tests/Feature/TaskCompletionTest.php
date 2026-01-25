@@ -162,4 +162,55 @@ class TaskCompletionTest extends TestCase
             'task_id' => $task->id,
         ]);
     }
+
+    /**
+     * Test: Creating a task as DONE syncs journal.
+     */
+    public function test_create_done_task_syncs_journal(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/api/tasks', [
+                'title' => 'Done Task',
+                'status' => 'DONE',
+            ])
+            ->assertRedirect();
+
+        $task = Task::where('title', 'Done Task')->first();
+
+        $this->assertTrue(
+            TaskCompletion::where('user_id', $user->id)
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->exists()
+        );
+    }
+
+    /**
+     * Test: Updating task details (status) syncs journal.
+     */
+    public function test_update_details_syncs_journal(): void
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'IN_PROGRESS',
+        ]);
+
+        // Update status via PUT/PATCH on task details
+        $this->actingAs($user)
+            ->patch("/api/tasks/{$task->id}", [
+                'title' => 'Updated Title',
+                'status' => 'DONE',
+            ])
+            ->assertRedirect();
+
+        $this->assertTrue(
+            TaskCompletion::where('user_id', $user->id)
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->exists()
+        );
+    }
 }

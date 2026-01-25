@@ -28,6 +28,9 @@ class TaskController extends Controller
             'estimated_minutes' => $request->estimated_minutes,
         ]);
 
+        // Sync journal (in case created as DONE)
+        \App\Models\TaskCompletion::sync($task);
+
         return back()->with('success', 'Tâche créée avec succès !');
     }
 
@@ -83,6 +86,9 @@ class TaskController extends Controller
         // $this->authorize('update', $task); // Usually done in Request authorize()
         
         $task->update($request->validated());
+
+        // Sync journal (if status changed via edit)
+        \App\Models\TaskCompletion::sync($task);
 
         return back()->with('success', 'Tâche mise à jour !');
     }
