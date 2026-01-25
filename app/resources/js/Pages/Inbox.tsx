@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
 import { Inbox, Plus, Sun, Trash2, Clock } from "lucide-react";
 import { FormEventHandler, useState } from "react";
+import CreateTaskModal from "@/Components/CreateTaskModal";
 
 interface InboxItem {
     id: string;
@@ -18,15 +19,29 @@ interface InboxTask {
     created_at: string;
 }
 
+interface Project {
+    id: string;
+    name: string;
+}
+
 interface InboxProps {
     inboxItems: InboxItem[];
     inboxTasks: InboxTask[];
+    projects?: Project[];
 }
 
-export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
+export default function InboxPage({
+    inboxItems,
+    inboxTasks,
+    projects = [],
+}: InboxProps) {
     const [quickCapture, setQuickCapture] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+    // Modal state
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [itemToConvert, setItemToConvert] = useState<InboxItem | null>(null);
 
     const handleQuickCapture: FormEventHandler = (e) => {
         e.preventDefault();
@@ -60,6 +75,20 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
             preserveScroll: true,
             onSuccess: () => setDeleteConfirmId(null),
         });
+    };
+
+    const openCreateTaskModal = (item?: InboxItem) => {
+        setItemToConvert(item || null);
+        setShowCreateModal(true);
+    };
+
+    const handleTaskCreated = () => {
+        // If we were converting an item, delete it now
+        if (itemToConvert) {
+            deleteItem(itemToConvert.id);
+        }
+        setShowCreateModal(false);
+        setItemToConvert(null);
     };
 
     const formatTimeAgo = (dateStr: string) => {
@@ -170,6 +199,9 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                                                 variant="outline"
                                                 size="sm"
                                                 className="gap-1"
+                                                onClick={() =>
+                                                    openCreateTaskModal(item)
+                                                }
                                             >
                                                 <Plus className="h-3 w-3" />
                                                 Créer tâche
@@ -248,6 +280,14 @@ export default function InboxPage({ inboxItems, inboxTasks }: InboxProps) {
                     </CardContent>
                 </Card>
             </div>
+
+            <CreateTaskModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                projects={projects}
+                defaultTitle={itemToConvert?.content || ""}
+                onSuccess={handleTaskCreated}
+            />
         </AppShell>
     );
 }
