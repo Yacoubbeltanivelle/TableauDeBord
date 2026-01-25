@@ -49,10 +49,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tasks/{task}', [\App\Http\Controllers\Api\TaskController::class, 'destroy'])->name('api.tasks.destroy');
 
         // Projects
-        // Projects
         Route::post('/projects', [\App\Http\Controllers\Api\ProjectController::class, 'store'])->name('api.projects.store');
         Route::patch('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'update'])->name('api.projects.update');
         Route::delete('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'destroy'])->name('api.projects.destroy');
+
+        // Inbox
+        Route::post('/inbox', [\App\Http\Controllers\Api\InboxController::class, 'store'])->name('api.inbox.store');
+        Route::delete('/inbox/{id}', [\App\Http\Controllers\Api\InboxController::class, 'destroy'])->name('api.inbox.destroy');
 
         // Notes
         Route::post('/notes', [\App\Http\Controllers\Api\NoteController::class, 'store'])->name('api.notes.store');

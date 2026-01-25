@@ -20,6 +20,7 @@ class InboxItem extends Model
         'processed_at',
         'converted_to',
         'converted_id',
+        'created_at',
     ];
 
     protected $casts = [
