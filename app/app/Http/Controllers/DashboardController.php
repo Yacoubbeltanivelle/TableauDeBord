@@ -23,6 +23,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         
         // Focus: Only IN_PROGRESS tasks for "Today" focus
+        // Sorted by Priority (URGENT->LOW) then Due Date (Closest->Furthest)
         $focusTasks = Task::where('user_id', $user->id)
             ->where('status', 'IN_PROGRESS')
             ->with('project:id,name,color')
@@ -31,8 +32,9 @@ class DashboardController extends Controller
                 WHEN 'HIGH' THEN 2 
                 WHEN 'MEDIUM' THEN 3 
                 WHEN 'LOW' THEN 4 
-                ELSE 5 END")
-            ->orderBy('due_date')
+                ELSE 5 END ASC")
+            ->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END ASC') // Dates first, then nulls? Or user wants urgency? usually dates first.
+            ->orderBy('due_date', 'asc') // Closest first
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(fn($task) => [
@@ -77,9 +79,12 @@ class DashboardController extends Controller
             ? (int) round(($doneTodayCount / ($doneTodayCount + $focusCount)) * 100)
             : 0;
 
-        // Days remaining until end of year (integer)
-        $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31);
-        $daysRemaining = (int) now()->diffInDays($endOfYear);
+        // Days remaining until end of year (integer) + Months/Weeks
+        $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31)->endOfDay();
+        $now = now();
+        $daysRemaining = (int) $now->diffInDays($endOfYear);
+        $weeksRemaining = (int) $now->diffInWeeks($endOfYear);
+        $monthsRemaining = (int) $now->diffInMonths($endOfYear);
 
         // Tasks completed since January 1st of current year (from journal)
         $startOfYear = \Carbon\Carbon::createFromDate(now()->year, 1, 1);
@@ -100,6 +105,8 @@ class DashboardController extends Controller
             'focusCount' => $focusCount,
             'progressPercent' => $progressPercent,
             'daysRemaining' => $daysRemaining,
+            'weeksRemaining' => $weeksRemaining,
+            'monthsRemaining' => $monthsRemaining,
             'currentYear' => now()->year,
             'yearlyCompletedCount' => $yearlyCompletedCount,
             'projects' => $projects,
@@ -137,9 +144,16 @@ class DashboardController extends Controller
                 'created_at' => $task->created_at->diffForHumans(),
             ]);
 
+        // Fetch projects for task creation dropdown
+        $projects = Project::where('user_id', $user->id)
+            ->whereIn('category', ['PROJECT', 'AREA'])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('Inbox', [
             'inboxItems' => $inboxItems,
             'inboxTasks' => $inboxTasks,
+            'projects' => $projects,
         ]);
     }
 

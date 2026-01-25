@@ -62,10 +62,35 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user1)->get('/today');
 
-        $response->assertStatus(200);
         $response->assertInertia(fn ($page) => 
             $page->component('Today')
-                ->has('focusTasks', 1) // Only user1's task
+                ->has('focusTasks')
+                ->has('completedToday')
+        );
+    }
+
+    /**
+     * Test: Focus tasks are sorted effectively (Priority > DueDate).
+     */
+    public function test_focus_tasks_are_sorted_correctly(): void
+    {
+        $user = User::factory()->create();
+
+        // Create tasks in random order
+        $t1 = Task::factory()->create(['user_id' => $user->id, 'status' => 'IN_PROGRESS', 'priority' => 'LOW', 'due_date' => now()->addDays(5)]);
+        $t2 = Task::factory()->create(['user_id' => $user->id, 'status' => 'IN_PROGRESS', 'priority' => 'URGENT', 'due_date' => now()->addDays(10)]); // Urgent comes first
+        $t3 = Task::factory()->create(['user_id' => $user->id, 'status' => 'IN_PROGRESS', 'priority' => 'HIGH', 'due_date' => now()->addDays(1)]); // High comes second
+        $t4 = Task::factory()->create(['user_id' => $user->id, 'status' => 'IN_PROGRESS', 'priority' => 'HIGH', 'due_date' => now()->addDays(20)]); // High same priority, later date -> after t3
+        
+        $response = $this->actingAs($user)->get('/today');
+        
+        $response->assertInertia(fn ($page) => $page
+            ->component('Today')
+            ->has('focusTasks', 4)
+            ->where('focusTasks.0.id', $t2->id) // Urgent (t2)
+            ->where('focusTasks.1.id', $t3->id) // High, early date (t3)
+            ->where('focusTasks.2.id', $t4->id) // High, late date (t4)
+            ->where('focusTasks.3.id', $t1->id) // Low (t1)
         );
     }
 

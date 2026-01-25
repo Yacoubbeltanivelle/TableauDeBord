@@ -48,6 +48,8 @@ interface TodayProps {
     focusCount: number;
     progressPercent: number;
     daysRemaining: number;
+    weeksRemaining: number;
+    monthsRemaining: number;
     currentYear: number;
     yearlyCompletedCount: number;
     projects?: Project[];
@@ -60,6 +62,8 @@ export default function Today({
     focusCount,
     progressPercent,
     daysRemaining,
+    weeksRemaining,
+    monthsRemaining,
     currentYear,
     yearlyCompletedCount,
     projects = [],
@@ -178,8 +182,9 @@ export default function Today({
                             <div className="text-2xl font-bold text-foreground">
                                 {daysRemaining} jours
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                avant la fin de {currentYear}
+                            <p className="text-xs text-muted-foreground mt-1 text-nowrap">
+                                ({monthsRemaining} mois, {weeksRemaining}{" "}
+                                semaines)
                             </p>
                         </CardContent>
                     </Card>
