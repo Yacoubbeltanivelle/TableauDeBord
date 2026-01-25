@@ -15,11 +15,11 @@ class InboxTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->postJson('/api/inbox', [
+        $response = $this->actingAs($user)->post('/api/inbox', [
             'content' => 'Buy milk',
         ]);
 
-        $response->assertCreated();
+        $response->assertRedirect();
         $this->assertDatabaseHas('inbox_items', [
             'user_id' => $user->id,
             'content' => 'Buy milk',
@@ -38,9 +38,9 @@ class InboxTest extends TestCase
             'created_at' => now(),
         ]);
 
-        $response = $this->actingAs($user)->deleteJson("/api/inbox/{$item->id}");
+        $response = $this->actingAs($user)->delete("/api/inbox/{$item->id}");
 
-        $response->assertNoContent();
+        $response->assertRedirect();
         $this->assertDatabaseMissing('inbox_items', [
             'id' => $item->id,
         ]);

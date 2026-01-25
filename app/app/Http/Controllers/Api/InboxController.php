@@ -18,14 +18,14 @@ class InboxController extends Controller
             'content' => 'required|string|max:1000',
         ]);
 
-        $item = InboxItem::create([
+        InboxItem::create([
             'user_id' => Auth::id(),
             'content' => $request->content,
             'processed' => false,
-            'created_at' => now(), // Manually set since timestamps=false in model
+            'created_at' => now(),
         ]);
 
-        return response()->json($item, 201);
+        return back()->with('success', 'Élément ajouté à la boîte de réception');
     }
 
     /**
@@ -38,6 +38,6 @@ class InboxController extends Controller
         // Hard delete as per user request flow (converted to task -> delete this)
         $item->delete();
 
-        return response()->noContent();
+        return back()->with('success', 'Élément supprimé');
     }
 }
