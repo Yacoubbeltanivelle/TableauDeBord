@@ -45,36 +45,16 @@ class TaskController extends Controller
                 'status' => 'IN_PROGRESS',
                 'completed_at' => null,
             ]);
-            
-            // Soft-delete today's completion entry if exists
-            \App\Models\TaskCompletion::where('user_id', auth()->id())
-                ->where('task_id', $task->id)
-                ->whereDate('completed_on', today())
-                ->delete();
         } else {
             // Complete task: mark as DONE and record completion
             $task->update([
                 'status' => 'DONE',
                 'completed_at' => now(),
             ]);
-            
-            // Upsert completion entry (restore if soft-deleted)
-            $existing = \App\Models\TaskCompletion::withTrashed()
-                ->where('user_id', auth()->id())
-                ->where('task_id', $task->id)
-                ->whereDate('completed_on', today())
-                ->first();
-            
-            if ($existing) {
-                $existing->restore();
-            } else {
-                \App\Models\TaskCompletion::create([
-                    'user_id' => auth()->id(),
-                    'task_id' => $task->id,
-                    'completed_on' => today(),
-                ]);
-            }
         }
+
+        // Sync journal
+        \App\Models\TaskCompletion::sync($task);
 
         return back()->with('success', 'Tâche mise à jour !');
     }
@@ -134,6 +114,9 @@ class TaskController extends Controller
             'completed_at' => $request->status === 'DONE' ? now() : null,
         ]);
 
+        // Sync journal
+        \App\Models\TaskCompletion::sync($task);
+
         return back()->with('success', 'Statut mis à jour !');
     }
 
@@ -179,10 +162,15 @@ class TaskController extends Controller
                 
                 // Policy check: ensure user owns the task
                 if ($task && $task->user_id === auth()->id()) {
+                    $originalStatus = $task->status;
                     $task->update([
                         'position' => $item['position'],
                         'status' => $item['status'],
+                        'completed_at' => $item['status'] === 'DONE' ? now() : ($item['status'] !== 'DONE' && $originalStatus === 'DONE' ? null : $task->completed_at),
                     ]);
+                    
+                    // Sync journal if status changed to/from DONE
+                    \App\Models\TaskCompletion::sync($task);
                 }
             }
         });

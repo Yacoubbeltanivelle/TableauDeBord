@@ -128,4 +128,38 @@ class TaskCompletionTest extends TestCase
             'task_id' => $task->id,
         ]);
     }
+
+    /**
+     * Test: Updating status via KanBan (updateStatus) syncs journal.
+     */
+    public function test_update_status_syncs_journal(): void
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'IN_PROGRESS',
+        ]);
+
+        // 1. Move to DONE
+        $this->actingAs($user)
+            ->patch("/api/tasks/{$task->id}/status", ['status' => 'DONE'])
+            ->assertRedirect();
+
+        $this->assertTrue(
+            TaskCompletion::where('user_id', $user->id)
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->exists()
+        );
+
+        // 2. Move back to TODO (undo)
+        $this->actingAs($user)
+            ->patch("/api/tasks/{$task->id}/status", ['status' => 'TODO'])
+            ->assertRedirect();
+
+        $this->assertSoftDeleted('task_completions', [
+            'user_id' => $user->id,
+            'task_id' => $task->id,
+        ]);
+    }
 }

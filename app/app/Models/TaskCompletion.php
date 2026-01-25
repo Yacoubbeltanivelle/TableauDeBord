@@ -34,4 +34,42 @@ class TaskCompletion extends Model
     {
         return $this->belongsTo(Task::class);
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Helper Methods
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Sync completion status based on task status.
+     * Upserts completion entry when DONE, soft-deletes when not DONE.
+     */
+    public static function sync(Task $task): void
+    {
+        if ($task->status === 'DONE') {
+            // Upsert completion entry (restore if soft-deleted)
+            $existing = self::withTrashed()
+                ->where('user_id', $task->user_id)
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->first();
+            
+            if ($existing) {
+                if ($existing->trashed()) {
+                    $existing->restore();
+                }
+            } else {
+                self::create([
+                    'user_id' => $task->user_id,
+                    'task_id' => $task->id,
+                    'completed_on' => today(),
+                ]);
+            }
+        } else {
+            // Soft-delete today's completion entry if exists (undo)
+            self::where('user_id', $task->user_id)
+                ->where('task_id', $task->id)
+                ->whereDate('completed_on', today())
+                ->delete();
+        }
+    }
 }
