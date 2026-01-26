@@ -18,6 +18,7 @@ import {
     Target,
     Trophy,
     Quote,
+    RotateCw,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -78,6 +79,31 @@ export default function Today({
         author: string | null;
     } | null>(null);
     const [quoteLoading, setQuoteLoading] = useState(true);
+
+    const refreshQuote = () => {
+        setQuoteLoading(true);
+        fetch("/api/motivation?refresh=true")
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.error) {
+                    setQuote({ text: data.text, author: data.author });
+                }
+                setQuoteLoading(false);
+            })
+            .catch(() => setQuoteLoading(false));
+    };
+
+    // Auto-refresh countdown every hour
+    useEffect(() => {
+        const interval = setInterval(
+            () => {
+                router.reload({ only: ["countdown"], preserveScroll: true });
+            },
+            1000 * 60 * 60,
+        ); // 1 hour
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Fetch motivational quote on mount
     useEffect(() => {
@@ -227,8 +253,18 @@ export default function Today({
                     {/* B3: Motivation Quote */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
+                            <CardTitle className="text-sm font-medium flex items-center gap-2">
                                 Motivation
+                                <button
+                                    onClick={refreshQuote}
+                                    className="text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                                    title="Nouvelle citation"
+                                    disabled={quoteLoading}
+                                >
+                                    <RotateCw
+                                        className={`h-3 w-3 ${quoteLoading ? "animate-spin" : ""}`}
+                                    />
+                                </button>
                             </CardTitle>
                             <Quote className="h-5 w-5 text-purple-500" />
                         </CardHeader>
