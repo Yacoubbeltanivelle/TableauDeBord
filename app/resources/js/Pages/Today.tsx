@@ -219,7 +219,16 @@ export default function Today({
                                     className="flex flex-col items-center gap-2"
                                 >
                                     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-sm">
-                                        <span className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 font-mono tracking-tighter">
+                                        <span
+                                            className={`font-bold text-zinc-900 dark:text-zinc-100 font-mono tracking-tighter ${
+                                                String(item.value).length > 3
+                                                    ? "text-lg md:text-xl"
+                                                    : String(item.value)
+                                                            .length > 2
+                                                      ? "text-xl md:text-2xl"
+                                                      : "text-2xl md:text-3xl"
+                                            }`}
+                                        >
                                             {item.value}
                                         </span>
                                     </div>

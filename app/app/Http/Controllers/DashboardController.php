@@ -82,61 +82,18 @@ class DashboardController extends Controller
         // Countdown calculation details
         $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31)->endOfDay();
         $now = now();
-        $diff = $now->diff($endOfYear);
-
-        // Calculate weeks and days manually from total days difference to avoid Carbon's interval ambiguities
-        // Carbon diff returns absolute differences (y, m, d, h, i, s). 
-        // We want a cascade down: Years -> Months -> Weeks -> Days -> Hours
-        // $diff->d is purely days (0-30).
-        
-        $years = $diff->y;
-        $months = $diff->m;
-        $daysRemainder = $diff->d; 
-        
-        // Calculate total weeks remaining in the year (not just remainder)
-        // User requested "Exact weeks remaining" instead of "00"
-        $totalWeeksRemaining = (int) $now->diffInWeeks($endOfYear);
-        
-        // For Days, we stick to the remainder days or total days?
-        // The display is Y/M/W/D/H.
-        // If we show Total Weeks (e.g. 48), showing Months=11 is confusing (redundant).
-        // Usually Y/M/W/D is a breakdown.
-        // BUT user specifically asked "Why is weeks 0?".
-        // If I put "Total Weeks", then "Months" should probably be separate?
-        // Let's stick to the requested "Weeks" value being the total weeks, but keep the rest as breakdown?
-        // Actually, if Weeks = Total Weeks, then Months is redundant.
-        // But the UI has 5 slots.
-        // Let's assume user wants: Years (0), Months (11), Weeks (Total e.g. 48?), Days (5).
-        // This is mathematically inconsistent (sum > total).
-        // However, "Weeks = 0" was the complaint.
-        // Maybe they want Weeks column to show the weeks component IF it was only Days/Weeks?
-        
-        // Let's try to interpret "Exact total weeks remaining".
-        // I will replace the 'weeks' value with the Total Weeks count, as requested.
-        // And keep 'days' as the remainder days? Or total days?
-        // Let's keep 'days' as remainder of the Breakdown, otherwise it's confusing.
-        // Wait, if I show 11 Months AND 48 Weeks, it looks like 11 Months + 48 Weeks = ~2 years.
-        
-        // Alternative interpretation: User thinks "0 Weeks" is wrong because 5 days is close to a week?
-        // No, user said "afficher le nombre de semaine exact restantes à la place de 00". "Exact remaining weeks".
-        // This implies Total Weeks.
-        
-        $years = str_pad((string)$years, 2, '0', STR_PAD_LEFT);
-        $months = str_pad((string)$months, 2, '0', STR_PAD_LEFT);
-        $weeks = str_pad((string)$totalWeeksRemaining, 2, '0', STR_PAD_LEFT);
-        $days = str_pad((string)$daysRemainder, 2, '0', STR_PAD_LEFT); // Partial days inside the month/week?
-        // Actually Carbon diff d is days *after* months.
-        // So 11 months + 5 days.
-        
-        // I will set 'weeks' to Total Weeks, and strict 'days' to Remainder days. 
-        // Note: This is visually inconsistent but matches user request "Show exact weeks".
+        // Calculate TOTAL remaining units independently as requested
+        // Each box shows the total time remaining in that unit (e.g. 8000 hours total)
+        $months = (int) $now->diffInMonths($endOfYear);
+        $weeks = (int) $now->diffInWeeks($endOfYear);
+        $days = (int) $now->diffInDays($endOfYear);
+        $hours = (int) $now->diffInHours($endOfYear);
         
         $countdown = [
-            'years' => $years,
-            'months' => $months,
-            'weeks' => $weeks,
-            'days' => $days,
-            'hours' => str_pad((string)$diff->h, 2, '0', STR_PAD_LEFT),
+            'months' => str_pad((string)$months, 2, '0', STR_PAD_LEFT),
+            'weeks' => str_pad((string)$weeks, 2, '0', STR_PAD_LEFT),
+            'days' => str_pad((string)$days, 2, '0', STR_PAD_LEFT),
+            'hours' => str_pad((string)$hours, 2, '0', STR_PAD_LEFT),
         ];
 
         // Tasks completed since January 1st of current year (from journal)
