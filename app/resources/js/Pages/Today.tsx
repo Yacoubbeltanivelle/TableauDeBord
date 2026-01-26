@@ -209,7 +209,6 @@ export default function Today({
                         <CardContent className="flex justify-between items-center px-4 py-8">
                             {/* Countdown Items */}
                             {[
-                                { label: "Ans", value: countdown.years },
                                 { label: "Mois", value: countdown.months },
                                 { label: "Sem.", value: countdown.weeks },
                                 { label: "Jours", value: countdown.days },
