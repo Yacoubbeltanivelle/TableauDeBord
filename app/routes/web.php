@@ -54,6 +54,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'destroy'])->name('api.projects.destroy');
 
         // Inbox
+        Route::get('/inbox', function () {
+            // Defensive redirect if user somehow ends up here via GET
+            return redirect()->route('inbox');
+        });
         Route::post('/inbox', [\App\Http\Controllers\Api\InboxController::class, 'store'])->name('api.inbox.store');
         Route::delete('/inbox/{id}', [\App\Http\Controllers\Api\InboxController::class, 'destroy'])->name('api.inbox.destroy');
 

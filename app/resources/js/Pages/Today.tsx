@@ -47,9 +47,13 @@ interface TodayProps {
     doneTodayCount: number;
     focusCount: number;
     progressPercent: number;
-    daysRemaining: number;
-    weeksRemaining: number;
-    monthsRemaining: number;
+    countdown: {
+        years: string;
+        months: string;
+        weeks: string;
+        days: string;
+        hours: string;
+    };
     currentYear: number;
     yearlyCompletedCount: number;
     projects?: Project[];
@@ -61,9 +65,7 @@ export default function Today({
     doneTodayCount,
     focusCount,
     progressPercent,
-    daysRemaining,
-    weeksRemaining,
-    monthsRemaining,
+    countdown,
     currentYear,
     yearlyCompletedCount,
     projects = [],
@@ -170,22 +172,37 @@ export default function Today({
 
                 {/* 3 Motivational Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* B1: Days Remaining */}
-                    <Card>
+                    {/* B1: Countdown Card */}
+                    <Card className="col-span-1 md:col-span-1">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
                                 Fin d'année
                             </CardTitle>
                             <Target className="h-5 w-5 text-blue-500" />
                         </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-foreground">
-                                {daysRemaining} jours
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1 text-nowrap">
-                                ({monthsRemaining} mois, {weeksRemaining}{" "}
-                                semaines)
-                            </p>
+                        <CardContent className="flex justify-between items-center px-2 py-4">
+                            {/* Countdown Items */}
+                            {[
+                                { label: "Ans", value: countdown.years },
+                                { label: "Mois", value: countdown.months },
+                                { label: "Sem.", value: countdown.weeks },
+                                { label: "Jours", value: countdown.days },
+                                { label: "Heures", value: countdown.hours },
+                            ].map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="flex flex-col items-center gap-1"
+                                >
+                                    <div className="bg-background dark:bg-card border-2 border-muted-foreground/20 rounded-lg w-10 h-10 md:w-12 md:h-12 flex items-center justify-center shadow-sm">
+                                        <span className="text-lg md:text-xl font-bold text-foreground font-mono">
+                                            {item.value}
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] md:text-xs text-muted-foreground font-medium uppercase tracking-tight">
+                                        {item.label}
+                                    </span>
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
 

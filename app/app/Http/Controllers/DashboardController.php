@@ -79,12 +79,34 @@ class DashboardController extends Controller
             ? (int) round(($doneTodayCount / ($doneTodayCount + $focusCount)) * 100)
             : 0;
 
-        // Days remaining until end of year (integer) + Months/Weeks
+        // Countdown calculation details
         $endOfYear = \Carbon\Carbon::createFromDate(now()->year, 12, 31)->endOfDay();
         $now = now();
-        $daysRemaining = (int) $now->diffInDays($endOfYear);
-        $weeksRemaining = (int) $now->diffInWeeks($endOfYear);
-        $monthsRemaining = (int) $now->diffInMonths($endOfYear);
+        $diff = $now->diff($endOfYear);
+
+        // Calculate weeks and days manually from total days difference to avoid Carbon's interval ambiguities
+        // Carbon diff returns absolute differences (y, m, d, h, i, s). 
+        // We want a cascade down: Years -> Months -> Weeks -> Days -> Hours
+        
+        $diffInDays = $diff->days; // Total difference in days
+        
+        // However, user specifically asked for Years, Months, Weeks, Days, Hours split.
+        // Carbon's $diff->d is "days excluding months/years".
+        // But it doesn't split "weeks".
+        // So we need:
+        // Years = $diff->y
+        // Months = $diff->m
+        // Weeks = floor($diff->d / 7)
+        // Days = $diff->d % 7
+        // Hours = $diff->h
+        
+        $countdown = [
+            'years' => str_pad((string)$diff->y, 2, '0', STR_PAD_LEFT),
+            'months' => str_pad((string)$diff->m, 2, '0', STR_PAD_LEFT),
+            'weeks' => str_pad((string)floor($diff->d / 7), 2, '0', STR_PAD_LEFT),
+            'days' => str_pad((string)($diff->d % 7), 2, '0', STR_PAD_LEFT),
+            'hours' => str_pad((string)$diff->h, 2, '0', STR_PAD_LEFT),
+        ];
 
         // Tasks completed since January 1st of current year (from journal)
         $startOfYear = \Carbon\Carbon::createFromDate(now()->year, 1, 1);
@@ -104,9 +126,7 @@ class DashboardController extends Controller
             'doneTodayCount' => $doneTodayCount,
             'focusCount' => $focusCount,
             'progressPercent' => $progressPercent,
-            'daysRemaining' => $daysRemaining,
-            'weeksRemaining' => $weeksRemaining,
-            'monthsRemaining' => $monthsRemaining,
+            'countdown' => $countdown,
             'currentYear' => now()->year,
             'yearlyCompletedCount' => $yearlyCompletedCount,
             'projects' => $projects,
