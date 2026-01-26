@@ -53,9 +53,6 @@ Route::middleware('auth')->group(function () {
         Route::patch('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'update'])->name('api.projects.update');
         Route::delete('/projects/{project}', [\App\Http\Controllers\Api\ProjectController::class, 'destroy'])->name('api.projects.destroy');
 
-        // Motivation
-        Route::get('/motivation', [\App\Http\Controllers\Api\MotivationController::class, 'random']);
-        
         // Inbox
         Route::get('/inbox', function () {
             // Defensive redirect if user somehow ends up here via GET

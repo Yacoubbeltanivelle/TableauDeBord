@@ -95,7 +95,7 @@ class DashboardController extends Controller
         
         // Calculate total weeks remaining in the year (not just remainder)
         // User requested "Exact weeks remaining" instead of "00"
-        $totalWeeksRemaining = $now->diffInWeeks($endOfYear);
+        $totalWeeksRemaining = (int) $now->diffInWeeks($endOfYear);
         
         // For Days, we stick to the remainder days or total days?
         // The display is Y/M/W/D/H.
