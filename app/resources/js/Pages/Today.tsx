@@ -180,7 +180,7 @@ export default function Today({
                             </CardTitle>
                             <Target className="h-5 w-5 text-blue-500" />
                         </CardHeader>
-                        <CardContent className="flex justify-between items-center px-2 py-4">
+                        <CardContent className="flex justify-between items-center px-4 py-8">
                             {/* Countdown Items */}
                             {[
                                 { label: "Ans", value: countdown.years },
@@ -191,14 +191,14 @@ export default function Today({
                             ].map((item, index) => (
                                 <div
                                     key={index}
-                                    className="flex flex-col items-center gap-1"
+                                    className="flex flex-col items-center gap-2"
                                 >
-                                    <div className="bg-background dark:bg-card border-2 border-muted-foreground/20 rounded-lg w-10 h-10 md:w-12 md:h-12 flex items-center justify-center shadow-sm">
-                                        <span className="text-lg md:text-xl font-bold text-foreground font-mono">
+                                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl w-14 h-14 md:w-16 md:h-16 flex items-center justify-center shadow-sm">
+                                        <span className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 font-mono tracking-tighter">
                                             {item.value}
                                         </span>
                                     </div>
-                                    <span className="text-[10px] md:text-xs text-muted-foreground font-medium uppercase tracking-tight">
+                                    <span className="text-[10px] md:text-xs text-muted-foreground font-semibold uppercase tracking-wider">
                                         {item.label}
                                     </span>
                                 </div>

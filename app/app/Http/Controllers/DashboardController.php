@@ -87,24 +87,21 @@ class DashboardController extends Controller
         // Calculate weeks and days manually from total days difference to avoid Carbon's interval ambiguities
         // Carbon diff returns absolute differences (y, m, d, h, i, s). 
         // We want a cascade down: Years -> Months -> Weeks -> Days -> Hours
+        // $diff->d is purely days (0-30).
         
-        $diffInDays = $diff->days; // Total difference in days
+        $years = $diff->y;
+        $months = $diff->m;
+        $daysRemainder = $diff->d; // This is days excluding full months. e.g. 5 days.
         
-        // However, user specifically asked for Years, Months, Weeks, Days, Hours split.
-        // Carbon's $diff->d is "days excluding months/years".
-        // But it doesn't split "weeks".
-        // So we need:
-        // Years = $diff->y
-        // Months = $diff->m
-        // Weeks = floor($diff->d / 7)
-        // Days = $diff->d % 7
-        // Hours = $diff->h
+        // Calculate weeks from the remainder days
+        $weeks = floor($daysRemainder / 7);
+        $days = $daysRemainder % 7;
         
         $countdown = [
-            'years' => str_pad((string)$diff->y, 2, '0', STR_PAD_LEFT),
-            'months' => str_pad((string)$diff->m, 2, '0', STR_PAD_LEFT),
-            'weeks' => str_pad((string)floor($diff->d / 7), 2, '0', STR_PAD_LEFT),
-            'days' => str_pad((string)($diff->d % 7), 2, '0', STR_PAD_LEFT),
+            'years' => str_pad((string)$years, 2, '0', STR_PAD_LEFT),
+            'months' => str_pad((string)$months, 2, '0', STR_PAD_LEFT),
+            'weeks' => str_pad((string)$weeks, 2, '0', STR_PAD_LEFT), // e.g. 5 days = 00 weeks
+            'days' => str_pad((string)$days, 2, '0', STR_PAD_LEFT),    // e.g. 5 days
             'hours' => str_pad((string)$diff->h, 2, '0', STR_PAD_LEFT),
         ];
 
